@@ -1,0 +1,118 @@
+# You can copy this file into /etc/portage/make.conf
+# (It is also possible to turn /etc/portage/make.conf/ into a directory
+# and to move this file and the original /etc/portage/make.conf there).
+# Here variables are set which are used in /etc/portage/repo.postsync.d/*
+# If the variables are not set, the default values in the comments are used
+
+# The permissions of the repositories.
+# As soon as possible, permissions are dropped to those of that user.
+# The value "root" means that no permissions are dropped.
+# POSTSYNC_USER=portage
+
+# The path to the shell; default is `command -v sh` and if that fails:
+# POSTSYNC_SHELL=/bin/sh
+
+# The file which contains helper functions needed in most scripts
+# POSTSYNC_FUNCTIONS="${EPREFIX}/lib/gentoo/repo.postsync.functions.sh"
+
+# The file which contains the standard gentoo helper functions
+# POSTSYNC_FUNCTIONS_SH="${EPREFIX}/lib/gentoo/functions.sh"
+
+# The name of the main repository:
+# POSTSYNC_MAIN_REPOSITORY=gentoo
+
+# The name of the mirror from which the pre-generated cache is synced.
+# Depending on your continent, the following choices might be reasonable:
+# North America:
+# POSTSYNC_SYNC="rsync://rsync.namerica.gentoo.org/gentoo-portage"
+# South America:
+# POSTSYNC_SYNC="rsync://rsync.samerica.gentoo.org/gentoo-portage"
+# Europe:
+# POSTSYNC_SYNC="rsync://rsync.europe.gentoo.org/gentoo-portage"
+# Asia:
+# POSTSYNC_SYNC="rsync://rsync.asia.gentoo.org/gentoo-portage"
+# Australia:
+# POSTSYNC_SYNC="rsync://rsync.au.gentoo.org/gentoo-portage"
+# The default is
+# POSTSYNC_SYNC="${SYNC}"
+# If SYNC is empty or unset, the default is
+# POSTSYNC_SYNC="rsync://rsync.gentoo.org/gentoo-portage"
+
+# The minimal number of days between last update and fetching of the
+# pre-generated metadata cache for the main repository
+# (0 means never, and non-numerical values mean every time).
+# Note that fetching pre-generated metadata takes time and costs traffic,
+# but if your last syncing is too old, generating metadata can take very long.
+# POSTSYNC_DAYS_CACHE=10
+
+# In case the pre-generated metadata cache for the main repository is fetched:
+# Only fetch the data if the fetched data is presumably not older than this
+# number of days
+# (0 means accept always, non-numerical values mean never)
+# POSTSYNC_DAYS_CACHE_MAX=1
+
+# The minimal number of days between two calls of git-gc in the main repository
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_GIT_GC=7
+
+# The number to use for --jobs when calling egencache.
+# The empty value (default) means the number of processors.
+# A non-numerical value means that no --jobs argument is passed.
+# POSTSYNC_JOBS=""
+
+# Skip generating the cache for these repositories.
+# The value * means every repository besides the main repository.
+# The main repository is skipped if the sync address does not end with .git
+# POSTSYNC_SKIP=""
+
+# Extra arguments to pass to egencache. This is a list of the form
+# "repository extraarg repository extraarg ..."
+# repositories can be repeated.
+# The repository * means every repository except the main repository.
+# Typical example:
+# POSTSYNC_EGENCACHE="local --update-use-local-desc"
+# The default is:
+# POSTSYNC_EGENCACHE=""
+
+# This is added to POSTSYNC_EGENCACHE. Do not set it unless you want to
+# _remove_ the defaults for some reason
+# POSTSYNC_EGENCACHE_DEFAULT="
+# ${POSTSYNC_MAIN_REPOSITORY} --update-use-local-desc
+# mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
+
+# The minimal number of days before syncing glsa again
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_NEWS=1
+
+# How deep to clone the glsa git repository (0 or non-numeric is unlimited)
+# POSTSYNC_DEPTH_NEWS=1
+
+# The URL of the glsa git repository
+# POSTSYNC_URL_NEWS="https://anongit.gentoo.org/git/data/gentoo-news.git"
+
+# The minimal number of days before syncing glsa again
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_GLSA=2
+
+# How deep to clone the glsa git repository (0 or non-numeric is unlimited)
+# POSTSYNC_DEPTH_GLSA=1
+
+# The URL of the glsa git repository
+# POSTSYNC_URL_GLSA="https://anongit.gentoo.org/git/data/glsa.git"
+
+# The minimal number of days before syncing dtd again
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_DTD=30
+
+# How deep to clone the dtd git repository (0 or non-numeric is unlimited)
+# POSTSYNC_DEPTH_DTD=1
+
+# The URL of the dtd git repository
+# POSTSYNC_URL_DTD="https://anongit.gentoo.org/git/data/dtd.git"
+
+# The minimal number of days before syncing projects.xml again
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_PROJECTS_XML=30
+
+# The URL of the projects.xml file:
+# POSTSYNC_URL_PROJECTS_XML="https://api.gentoo.org/metastructure/projects.xml"

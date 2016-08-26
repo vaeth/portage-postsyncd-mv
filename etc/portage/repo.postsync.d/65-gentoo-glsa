@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -u
+only_main=:
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+case $sync_uri in
+*.git)
+	restart_as_default "$@";;
+*)
+	exit 0;;
+esac
+
+max_days_file "${POSTSYNC_DAYS_GLSA:-2}" glsa.date || \
+	git_clone -g "${POSTSYNC_DEPTH_GLSA:-1}" \
+	"${POSTSYNC_URL_GLSA:-https://anongit.gentoo.org/git/data/glsa.git}" \
+	metadata/dtd 'Updating GLSAs'

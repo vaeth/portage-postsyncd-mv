@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+set -u
+only_main=:
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+case $sync_uri in
+*.git)
+	restart_as_default "$@";;
+*)
+	exit 0;;
+esac
+
+max_days_file "${POSTSYNC_DAYS_PROJECTS_XML:-30}" projects.xml.date && exit
+
+ebegin 'Updating projects.xml'
+wget ${PORTAGE_QUIET:+-q} -P "$repository_path/metadata/" -N \
+	"${POSTSYNC_URL_PROJECTS_XML:-https://api.gentoo.org/metastructure/projects.xml}"
+eend $?

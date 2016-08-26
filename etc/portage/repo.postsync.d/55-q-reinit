@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -u
+qreinit=${EPREFIX-}/etc/portage/repo.postsync.d/q-reinit
+test -r "$qreinit" && ! test -x "$qreinit" || exit 0
+only_main=false
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+#restart_as portage "$@"
+ebegin "Calling q-reinit for the $repository_name repository"
+"${POSTSYNC_SHELL:-sh}" "$qreinit" "$@"
+eend $?

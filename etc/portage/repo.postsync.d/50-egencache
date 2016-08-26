@@ -1,0 +1,69 @@
+#!/usr/bin/env sh
+set -u
+only_main=false
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+restart_as_default "$@"
+
+: ${POSTSYNC_MAIN_REPOSITORY:=gentoo}
+
+for i in ${POSTSYNC_SKIP-}
+do	if [ "$i" = "$repository_name" ] || {
+		[ "$i" = '*' ] && [ "$repository_name" != \
+			"$POSTSYNC_MAIN_REPOSITORY" ]
+	}
+	then	exit 0
+	fi
+done
+
+[ "$repository_name" != "$POSTSYNC_MAIN_REPOSITORY" ] || case $sync_uri in
+*.git)
+	max_days_file 0 metadata/timestamp.x;;
+*)
+	exit 0
+esac
+
+unset parallel_jobs
+parallel_jobs() {
+	[ -n "${parallel_jobs++}" ] && return
+	if [ -z "${POSTSYNC_JOBS:-}" ]
+	then	parallel_jobs=`nproc` || {
+		parallel_jobs=
+		return
+	}
+	else	parallel_jobs=$POSTSYNC_JOBS
+	fi
+	case ${parallel_jobs:-x} in
+	*[!0-9]*)
+		parallel_jobs=;;
+	esac
+}
+
+call_egencache='--update'
+call_egencache() {
+	ebegin "Updating metadata cache for $repository_name repository"
+	parallel_jobs
+	egencache ${parallel_jobs:+"--jobs=$parallel_jobs"} \
+		"--repo=$repository_name" $call_egencache
+	eend $?
+}
+
+[ -n "${POSTSYNC_EGENCACHE_DEFAULT++}" ] || POSTSYNC_EGENCACHE_DEFAULT="
+$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc
+mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
+
+repo=:
+for i in $POSTSYNC_EGENCACHE_DEFAULT ${POSTSYNC_EGENCACHE-}
+do	if $repo
+	then	repo=false
+		[ "$i" = "$repository_name" ] || {
+			[ "$i" = '*' ] && [ "$repository_name" != \
+			"$POSTSYNC_MAIN_REPOSITORY" ]
+		}
+		pick=$?
+	else	repo=:
+		[ $pick -ne 0 ] || \
+			call_egencache=$call_egencache${call_egencache:+\ }$i
+	fi
+done
+
+call_egencache
