@@ -1,38 +1,31 @@
 #!/usr/bin/env sh
 set -u
 only_main=:
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} ${1+"$@"}
-case $sync_uri in
-*.git)
-	restart_as_default "$@";;
-*)
-	exit 0;;
-esac
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} \
+	${1+"$@"}
+is_git || exit 0
+restart_as_default "$@"
 
 timerump=/metadata/timestamp.x
 timefile=$repository_path$timerump
-mirror=${POSTSYNC_SYNC:-"${SYNC:-rsync://rsync.gentoo.org/gentoo-portage}"}
-
-rsync_a() {
-	rsync -ltDHS -Pi --modify-window=1 -r --delete --whole-file \
-		${PORTAGE_QUIET:+-q} -- "$@"
-}
 
 fetch_timestamp() {
-	ebegin "Fetching metadata timestamp for $repository_name repository"
-	rsync_a "$mirror$timerump" "$timefile"
+	postsync_sync
+	ebegin "Fetching metadata timestamp for the $repository_name repository"
+	rsync_a "$POSTSYNC_SYNC$timerump" "$timefile"
 	eend $?
 }
 
 fetch_cache() {
-	ebegin "Fetching pre-generated metadata cache for $repository_name repository"
+	postsync_sync
+	ebegin "Fetching pre-generated metadata for the $repository_name repository"
 	fetch_cache=/metadata/md5-cache
-	rsync_a "$mirror$fetch_cache" "$repository_path$fetch_cache"
+	rsync_a "$POSTSYNC_SYNC$fetch_cache" "$repository_path$fetch_cache"
 	eend $?
 }
 
 max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" no-update && {
-	einfo "Skipping fetching of metadata for $repository_name repository"
+	einfo "Skipping fetching of metadata for the $repository_name repository"
 	exit
 }
 fetch_timestamp || exit 0

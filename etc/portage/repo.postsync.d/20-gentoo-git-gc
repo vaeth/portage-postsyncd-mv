@@ -1,13 +1,11 @@
 #!/usr/bin/env sh
 set -u
 only_main=:
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} ${1+"$@"}
-case $sync_uri in
-*.git)
-	restart_as_default "$@";;
-*)
-	exit 0;;
-esac
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} \
+	${1+"$@"}
+is_git || exit 0
+restart_as_default "$@"
 
 max_days_file "${POSTSYNC_DAYS_GIT_GC:-7}" git-gc.date || \
-git_gc "$repository_path" "Calling git-gc for $repository_name repository"
+	git_gc "$repository_path" \
+		"Calling git-gc for the $repository_name repository"

@@ -4,6 +4,30 @@
 # Here variables are set which are used in /etc/portage/repo.postsync.d/*
 # If the variables are not set, the default values in the comments are used
 
+# The following variables are honoured by more tools than these scripts:
+
+# Log errors/warnings?
+# EINFO_LOG=no
+
+# Suppress warnings and info output?
+# EINFO_QUIET=no
+
+# Suppress errors?
+# EERROR_QUIET=no
+
+# Be extra verbose in output
+# EINFO_VERBOSE=no
+
+# Suppress colors
+# RC_NOCOLOR=no
+
+# Let portage be quiet
+# PORTAGE_QUIET=
+
+# The console type. Fetched by `consoletype` if empty.
+# The type "serial" forces poor output
+# CONSOLETYPE
+
 # The permissions of the repositories.
 # As soon as possible, permissions are dropped to those of that user.
 # The value "root" means that no permissions are dropped.
@@ -14,9 +38,6 @@
 
 # The file which contains helper functions needed in most scripts
 # POSTSYNC_FUNCTIONS="${EPREFIX}/lib/gentoo/repo.postsync.functions.sh"
-
-# The file which contains the standard gentoo helper functions
-# POSTSYNC_FUNCTIONS_SH="${EPREFIX}/lib/gentoo/functions.sh"
 
 # The name of the main repository:
 # POSTSYNC_MAIN_REPOSITORY=gentoo
