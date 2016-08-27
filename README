@@ -8,8 +8,8 @@ This project provides several files which can be used for syncing with
 portage via git or github.
 
 The problem when syncing via git is that several files like the metadata cache,
-the news announcements, the GLSAs, dtd, and project.xml files are not modified
-and must be updated/fetched independently.
+the news announcements, the GLSAs, dtd, xml-schema, and project.xml files
+are not modified and must be updated/fetched independently.
 
 This project is loosely inspired by
 	https://github.com/hasufell/portage-gentoo-git-config

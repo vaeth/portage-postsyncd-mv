@@ -121,6 +121,17 @@
 # The URL of the glsa git repository
 # POSTSYNC_URL_GLSA="https://anongit.gentoo.org/git/data/glsa.git"
 
+# The minimal number of days before syncing xml-schema again
+# (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_XML_SCHEMA=30
+
+# How deep to clone the xml-schema git repository
+# (0 or non-numeric is unlimited)
+# POSTSYNC_DEPTH_XML_SCHEMA=1
+
+# The URL of the xml-cschme git repository
+# POSTSYNC_URL_XML_SCHEMA="https://anongit.gentoo.org/git/data/xml-schema.git"
+
 # The minimal number of days before syncing dtd again
 # (0 means never, and non-numerical values mean every time)
 # POSTSYNC_DAYS_DTD=30
