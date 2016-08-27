@@ -24,12 +24,12 @@ fetch_cache() {
 	eend $?
 }
 
-max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" no-update && {
+! max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" || {
 	einfo "Skipping fetching of metadata for the $repository_name repository"
-	exit
+	exit 0
 }
 fetch_timestamp || exit 0
-max_days_file 1 "${POSTSYNC_DAYS_CACHE_MAX:-1}" no-update || {
+max_days_file "${POSTSYNC_DAYS_CACHE_MAX:-1}" "$timefile" || {
 	ewarn "Not fetching metadata cache: $timefile unreasonably old"
 	exit 0
 }

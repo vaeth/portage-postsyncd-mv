@@ -6,6 +6,7 @@ only_main=:
 is_git || exit 0
 restart_as_default "$@"
 
-max_days_file "${POSTSYNC_DAYS_GIT_GC:-7}" git-gc.date || \
-	git_gc "$repository_path" \
-		"Calling git-gc for the $repository_name repository"
+set -- "${POSTSYNC_DAYS_GIT_GC:-7}" git-gc.date
+! max_days_file "$@" || exit 0
+git_gc "$repository_path" "Calling git-gc for the $repository_name repository" \
+	&& update_days_file "$@"

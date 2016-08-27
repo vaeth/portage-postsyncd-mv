@@ -7,7 +7,7 @@ only_main=false
 restart_as_default "$@"
 
 [ x"$repository_name" != x"$POSTSYNC_MAIN_REPOSITORY" ] || if is_git
-then	max_days_file 0 metadata/timestamp.x
+then	update_days_file 1 metadata/timestamp.x
 else	exit 0
 fi
 egencache_options

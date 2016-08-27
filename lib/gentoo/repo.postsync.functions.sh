@@ -278,65 +278,99 @@ shift
 	die "Failed to exec $restart_as_name as $restart_as"
 }
 
-# Usage: max_days_file $days $file [$no-update]
+filestamp_file() {
+	case $1 in
+	/*)
+		filestamp_file=$1;;
+	*/*)
+		filestamp_file=$repository_path/${1#./};;
+	*)
+		filestamp_file=$repository_path/local/timestamps/$1;;
+	esac
+}
+
+check_readable() {
+	case $1 in
+	/*)
+		test -r "$1"
+		return;;
+	esac
+	test -r "$repository_path/$1"
+}
+
+current_date() {
+	current_date=`date +%s` || current_date=
+	case ${current_date:-x} in
+	*[!0-9]*)
+		current_date=0
+		eerror 'Failed to get currrent date'
+		return 1;;
+	esac
+	:
+}
+
+# Usage: max_days_file $days $file [$not_exist] [$append_to_not_exist]
 # returns success if filestamp in $file (in repository_path or local/timestamps
 # unless a more complete path is specified) is maximally $days old.
-# $days=0 counts as infinity (always success). Non-numerical $days means never
-# $file is updated unless argument $no-update is non-empty.
+# $days=0 counts as infinity (always success). Non-numerical $days means never.
+# If $not_exist (in repository_path unless a complete path is specified)
+# is non-empty and non-readable, failure is returned independent of $file
 max_days_file() {
 	case ${1:-x} in
 	*[!0-9]*)
 		return 1;;
 	esac
-	case $2 in
-	/*)
-		max_days_file=$2;;
-	*/*)
-		max_days_file=$repository_path/${2#./};;
-	*)
-		max_days_file=$repository_path/local/timestamps/$2;;
-	esac
-	max_days_file_dir=${max_days_file%/*}
-	if [ -z "${3:++}" ]
-	then	ebegin "Updating $max_days_file"
-	elif [ $1 -ne 0 ]
-	then	ebegin "Checking $max_days_file"
-	fi
-	max_days_file_last=0
-	if test -r "$max_days_file"
-	then	read max_days_file_last max_days_file_ret <"$max_days_file"
-	elif [ -z "${3:++}" ] && ! test -d "$max_days_file_dir"
-	then	mkdir -p -- "$max_days_file_dir" || {
-			eend $? "Failed to create $max_days_file_dir"
-			exit
-		}
-	fi
-	case ${max_days_file_last:-x} in
-	*[!0-9]*)
-		max_days_file_last=0;;
-	esac
-	max_days_file_ret=1
-	max_days_file_curr=`date +%s` || max_days_file_curr=
-	case ${max_days_file_curr:-x} in
-	*[!0-9]*)
-		max_days_file_curr=0
-		eerror 'Failed to get currrent date';;
-	*)
-		# 24 * 60 * 60 = 86400 seconds in one day
-		[ $1 -gt 0 ] && [ $(( $1 * 86400 )) -lt \
-			"$(( $max_days_file_curr - $max_days_file_last ))" ] \
-			|| max_days_file_ret=0;;
-	esac
-	[ -n "${3:++}" ] || printf "%s %s\n" "$max_days_file_curr" \
-		"`LC_ALL=C LC_TIME=C date -R || :`" >"$max_days_file" || {
-		eend $? "Failed to write to $max_days_file"
-		exit
+	[ "$1" -ne 0 ] || return 0
+	[ -z "${3:++}${4:++}" ] || check_readable "$3${4-}" || {
+		einfo "Missing $3${4-}"
+		return 1
 	}
-	[ $1 -eq 0 ] || eend 0
-	return $max_days_file_ret
+	filestamp_file "$2"
+	test -r "$filestamp_file" || {
+		einfo "Missing filestamp $filestamp_file"
+		return 1
+	}
+	read max_days_file current_date <"$filestamp_file"
+	case ${max_days_file:-x} in
+	*[!0-9]*)
+		max_days_file=0;;
+	esac
+	current_date || return 1
+	# 24 * 60 * 60 = 86400 seconds in one day
+	if [ $(( $1 * 86400 )) -gt "$(( $current_date - $max_days_file ))" ]
+	then	einfo "Recent filestamp $filestamp_file"
+		return 0
+	fi
+	einfo "Old filestamp $filestamp_file"
+	return 1
 }
 
-# Usage: git_clone [-g] depth remote local_path [Description]
+# Usage: update_days_file $days $file
+# Create/update timestamp in $file (in repository_path or local/timestamps
+# unless a more complete path is specified) unless $days is non_numeric
+# or zero.
+update_days_file() {
+	case ${1:-x} in
+	*[!0-9]*)
+		return 0;;
+	esac
+	[ "$1" -ne 0 ] || return 0
+	filestamp_file "$2"
+	update_days_file=${filestamp_file%/*}
+	test -d "$update_days_file" || mkdir -p -- "$update_days_file" || {
+		eerror "failed to create $update_days_file"
+		return 1
+	}
+	current_date
+	update_days_file=`LC_ALL=C LC_TIME=C date -R || :` || \
+		update_days_file=
+	ebegin "Updating $filestamp_file"
+	printf "%s %s\n" "$current_date" \
+		"$update_days_file" >|"$filestamp_file"
+	eend $? "Failed to create $filestamp_file"
+}
+
+# Usage: git_clone [-g] [--] depth remote local_path [Description]
 # depth 0 or non-numerical means that no --depth argument is passed
 # With option -g, apply git_gc afterwards.
 git_clone() {
@@ -363,7 +397,10 @@ git_clone() {
 		git_clone_local=$repository_path/$1;;
 	esac
 	shift
-	[ $# -gt 0 ] || ebegin "$1"
+	if [ -n "${1:++}" ]
+	then	einfo "$1"
+	else	einfo "Updating $git_clone_local"
+	fi
 	if test -d "$git_clone_local/.git"
 	then	git -C "$git_clone_local" pull ${PORTAGE_QUIET:+-q} --ff-only \
 			${git_clone_depth:+"--depth=$git_clone_depth"}
@@ -374,6 +411,7 @@ git_clone() {
 		eend $? "Try to remove $git_clone_local"
 		return
 	}
+	eend 0
 	$git_clone_gc "$git_clone_local"
 }
 
