@@ -364,7 +364,7 @@ git_clone() {
 	esac
 	shift
 	[ $# -gt 0 ] || ebegin "$1"
-	if test -d "$git_clone_local"
+	if test -d "$git_clone_local/.git"
 	then	git -C "$git_clone_local" pull ${PORTAGE_QUIET:+-q} --ff-only \
 			${git_clone_depth:+"--depth=$git_clone_depth"}
 	else	git clone ${PORTAGE_QUIET:+-q} \
