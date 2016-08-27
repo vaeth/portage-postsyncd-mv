@@ -9,32 +9,32 @@ repository_path=$3
 
 ebegin() {
 	provide_functions
-	eerror "$@"
+	eerror ${1+"$@"}
 }
 
 eend() {
 	provide_functions
-	eend "$@"
+	eend ${1+"$@"}
 }
 
 einfo() {
 	provide_functions
-	einfo "$@"
+	einfo ${1+"$@"}
 }
 
 ewarn() {
 	provide_functions
-	ewarn "$@"
+	ewarn ${1+"$@"}
 }
 
 
 eerror() {
 	provide_functions
-	eerror "$@"
+	eerror ${1+"$@"}
 }
 
 die() {
-	eerror "$@"
+	eerror ${1+"$@"}
 	exit 1
 }
 
@@ -45,17 +45,11 @@ check_writable() {
 }
 
 provide_functions() {
-	provide_functions=':'
-	case $- in
-	*u*)
-		provide_functions='set -u'
-		set +u;;
-	esac
-	: ${EERROR_QUIET=} ${EINFO_LOG=} ${EINFO_QUIET=}
+	: ${EERROR_QUIET=} ${EINFO_LOG=} ${EINFO_QUIET=} ${CONSOLETYPE=}
 	[ -n "${PORTAGE_QUIET:++}" ] && EINFO_QUIET=yes
-	provide_functions_sh=${POSTSYNC_FUNCTIONS_SH:="${EPREFIX-}"/lib/gentoo/functions.sh}
-	. ${provide_functions_sh}
-	$provide_functions
+	provide_functions=${POSTSYNC_FUNCTIONS_SH:="${EPREFIX-}"/lib/gentoo/functions.sh}
+	. "${provide_functions}"
+	: ${GOOD=} ${WARN=} ${BAD=} ${NORMAL=} ${HILITE=} ${BRACKET=}
 provide_functions() {
 	:
 }

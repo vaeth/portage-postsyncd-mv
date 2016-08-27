@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -u
 only_main=:
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} ${1+"$@"}
 case $sync_uri in
 *.git)
 	restart_as_default "$@";;

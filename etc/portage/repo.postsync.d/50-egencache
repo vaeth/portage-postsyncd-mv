@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -u
 only_main=false
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} "$@"
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} ${1+"$@"}
 restart_as_default "$@"
 
 : ${POSTSYNC_MAIN_REPOSITORY:=gentoo}
