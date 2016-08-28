@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -u
-only_main=:
+only_main=+
 . ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} \
 	${1+"$@"}
 is_git || exit 0

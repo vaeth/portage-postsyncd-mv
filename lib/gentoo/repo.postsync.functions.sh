@@ -2,7 +2,12 @@
 # This file must be sourced. The above line is only for editors
 [ -n "${1-}" ] || exit 0
 : ${POSTSYNC_MAIN_REPOSITORY:=gentoo}
-! $only_main || [ x"${1-}" = x"$POSTSYNC_MAIN_REPOSITORY" ] || exit 0
+case $only_main in
+'+')
+	[ x"${1-}" = x"$POSTSYNC_MAIN_REPOSITORY" ] || exit 0;;
+'-')
+	[ x"${1-}" != x"$POSTSYNC_MAIN_REPOSITORY" ] || exit 0;;
+esac
 
 repository_name=$1
 sync_uri=$2
@@ -153,6 +158,12 @@ ebegin() {
 	output_n " ${GOOD}*$NORMAL " "${*-} ..." ebegin
 }
 
+ebeginl() {
+	! einfo_quiet || return 0
+	init_colors
+	output_l " ${GOOD}*$NORMAL " "${*-} ..." ebeginl
+}
+
 eend_sub() {
 	if [ "$1" -eq 0 ]
 	then	! einfo_quiet || return 0
@@ -217,6 +228,10 @@ vebegin(){
 	! veinfo_verbose || ebegin ${1+"$@"}
 }
 
+vebeginl(){
+	! veinfo_verbose || ebeginl ${1+"$@"}
+}
+
 veend() {
 	! veinfo_verbose || eend ${1+"$@"}
 	return ${1:-0}
@@ -255,6 +270,8 @@ restart_as_default() {
 restart_as() {
 	[ x"$1" != x'root' ] || return 0
 	[ "`id -u`" -eq 0 ] || {
+		HOME=$restart_as_home
+		unset restart_as_home
 		check_writable "$1"
 		return 0
 	}
@@ -266,6 +283,11 @@ restart_as() {
 	esac
 	restart_as=$1
 	shift
+	case ${restart_as:-/} in
+	*[!a-zA-Z0-9_.,]*)
+		die "Not a valid \$POSTSYNC_USER: $restart_as";;
+	esac
+	eval export "restart_as_home=~$restart_as"
 	if [ -z "${POSTSYNC_SHELL:++}" ]
 	then	POSTSYNC_SHELL=`command -v sh 2>/dev/null` && \
 			[ -n "${POSTSYNC_SHELL:++}" ] || \
@@ -398,8 +420,8 @@ git_clone() {
 	esac
 	shift
 	if [ -n "${1:++}" ]
-	then	einfo "$1"
-	else	einfo "Updating $git_clone_local"
+	then	ebeginl "$1"
+	else	ebeginl "Updating $git_clone_local"
 	fi
 	if test -d "$git_clone_local/.git"
 	then	git -C "$git_clone_local" pull ${PORTAGE_QUIET:+-q} --ff-only \
@@ -407,12 +429,8 @@ git_clone() {
 	else	git clone ${PORTAGE_QUIET:+-q} \
 			${git_clone_depth:+"--depth=$git_clone_depth"} \
 			-- "$git_clone_remote" "$git_clone_local"
-	fi || {
-		eend $? "Try to remove $git_clone_local"
-		return
-	}
-	eend 0
-	$git_clone_gc "$git_clone_local"
+	fi || eend $? "Try to remove $git_clone_local" \
+		&& $git_clone_gc "$git_clone_local"
 }
 
 # Usage: git_gc dir [message]
@@ -425,10 +443,11 @@ git_gc() (
 		git_gc_dir=$repository_path/$1;;
 	esac
 	cd -- "$git_gc_dir" >/dev/null || exit 0
-	export LC_ALL=C LANG=C
+	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
+		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
-	then	ebegin "$2"
-	else	ebegin "Calling git-gc for $git_gc_dir"
+	then	ebeginl "$2"
+	else	ebeginl "Calling git-gc for $git_gc_dir"
 	fi
 	eval '{
 		git prune && \
@@ -453,7 +472,7 @@ postsync_job() {
 }
 
 is_repository() {
-	[ x"$1" = x"$repository_name" ] || {
+	[ x"$1" = x'**' ] || [ x"$1" = x"$repository_name" ] || {
 		[ x"$1" = x'*' ] && [ x"$repository_name" != \
 			x"$POSTSYNC_MAIN_REPOSITORY" ]
 	}
@@ -483,6 +502,7 @@ postsync_skip() {
 call_egencache() {
 	ebegin "Updating metadata cache for the $repository_name repository"
 	postsync_jobs
+	unset EGENCACHE_DEFAULT_OPTS
 	egencache ${POSTSYNC_JOBS:+"--jobs=$POSTSYNC_JOBS"} \
 		"--repo=$repository_name" "$@"
 	eend $?
@@ -490,9 +510,10 @@ call_egencache() {
 
 egencache_options() {
 	[ -n "${POSTSYNC_EGENCACHE_DEFAULT++}" ] || POSTSYNC_EGENCACHE_DEFAULT="
+	** --ignore-default-opts ** --update ** --tolerant
 	$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc
 	mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
-	egencache_options='--update'
+	egencache_options=
 	egencache_options_repo=:
 	for egencache_options_i in $POSTSYNC_EGENCACHE_DEFAULT ${POSTSYNC_EGENCACHE-}
 	do	if $egencache_options_repo

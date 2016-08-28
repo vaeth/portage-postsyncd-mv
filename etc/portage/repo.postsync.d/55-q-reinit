@@ -2,7 +2,7 @@
 set -u
 qreinit=${EPREFIX-}/etc/portage/repo.postsync.d/q-reinit
 test -r "$qreinit" && ! test -x "$qreinit" || exit 0
-only_main=false
+only_main=
 . ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} \
 	${1+"$@"}
 #restart_as_default "$@"

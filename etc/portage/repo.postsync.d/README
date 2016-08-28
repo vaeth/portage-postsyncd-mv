@@ -83,6 +83,7 @@
 
 # Skip generating the cache for these repositories.
 # The value * means every repository besides the main repository.
+# The value ** means every repository.
 # The main repository is skipped if the sync address does not end with .git
 # POSTSYNC_SKIP=""
 
@@ -90,14 +91,16 @@
 # "repository extraarg repository extraarg ..."
 # repositories can be repeated.
 # The repository * means every repository except the main repository.
+# The repository ** means every repository.
 # Typical example:
 # POSTSYNC_EGENCACHE="local --update-use-local-desc"
 # The default is:
 # POSTSYNC_EGENCACHE=""
 
-# This is added to POSTSYNC_EGENCACHE. Do not set it unless you want to
+# This is prepended to POSTSYNC_EGENCACHE. Do not set it unless you want to
 # _remove_ the defaults for some reason
 # POSTSYNC_EGENCACHE_DEFAULT="
+# ** --ignore-default-opts ** --update ** --tolerant
 # ${POSTSYNC_MAIN_REPOSITORY} --update-use-local-desc
 # mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
 
