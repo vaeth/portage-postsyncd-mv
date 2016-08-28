@@ -7,7 +7,8 @@ git_repository || exit 0
 restart_as_default "$@"
 
 git_gc_days
-set -- "${git_gc_days:-30}" .git/git-gc.date
+[ -n "${git_gc_days:++}" ] || exit 0
+set -- "$git_gc_days" .git/git-gc.date
 ! max_days_file "$@" || exit 0
 git_gc . "Calling git-gc for the $repository_name repository" \
 	&& update_days_file "$@"
