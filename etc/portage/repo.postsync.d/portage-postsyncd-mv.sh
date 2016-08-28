@@ -392,6 +392,18 @@ update_days_file() {
 	eend $? "Failed to create $filestamp_file"
 }
 
+local_path() {
+	local_path=${1%/}
+	case ${local_path:-.} in
+	/*)
+		:;;
+	.)
+		local_path=$repository_path;;
+	*)
+		local_path=$repository_path/${local_path%./};;
+	esac
+}
+
 # Usage: git_clone [-g] [--] depth remote local_path [Description]
 # depth 0 or non-numerical means that no --depth argument is passed
 # With option -g, apply git_gc afterwards.
@@ -412,42 +424,31 @@ git_clone() {
 	shift
 	git_clone_remote=$1
 	shift
-	case $1 in
-	/*)
-		git_clone_local=$1;;
-	*)
-		git_clone_local=$repository_path/$1;;
-	esac
+	local_path "$1"
 	shift
 	if [ -n "${1:++}" ]
 	then	ebeginl "$1"
-	else	ebeginl "Updating $git_clone_local"
+	else	ebeginl "Updating $local_path"
 	fi
-	if test -d "$git_clone_local/.git"
-	then	git -C "$git_clone_local" pull ${PORTAGE_QUIET:+-q} --ff-only \
+	if test -d "$local_path/.git"
+	then	git -C "$local_path" pull ${PORTAGE_QUIET:+-q} --ff-only \
 			${git_clone_depth:+"--depth=$git_clone_depth"}
 	else	git clone ${PORTAGE_QUIET:+-q} \
 			${git_clone_depth:+"--depth=$git_clone_depth"} \
-			-- "$git_clone_remote" "$git_clone_local"
-	fi || eend $? "Try to remove $git_clone_local" \
-		&& $git_clone_gc "$git_clone_local"
+			-- "$git_clone_remote" "$local_path"
+	fi || eend $? "Try to remove $local_path" \
+		&& $git_clone_gc "$local_path"
 }
 
 # Usage: git_gc dir [message]
 git_gc() (
-	git_gc_dir=
-	case $1 in
-	/*)
-		git_gc_dir=$1;;
-	*)
-		git_gc_dir=$repository_path/$1;;
-	esac
-	cd -- "$git_gc_dir" >/dev/null || exit 0
+	local_path "$1"
+	cd -- "$local_path" >/dev/null || exit 0
 	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
 		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
 	then	ebeginl "$2"
-	else	ebeginl "Calling git-gc for $git_gc_dir"
+	else	ebeginl "Calling git-gc for $local_path"
 	fi
 	eval '{
 		git prune && \
@@ -459,6 +460,33 @@ git_gc() (
 	}' ${PORTAGE_QUIET:+>/dev/null}
 	eend $?
 )
+
+git_gc_days() {
+	[ -n "${POSTSYNC_DAYS_GIT_GC_REPO:++}" ] || \
+		POSTSYNC_DAYS_GIT_GC_REPO='* 30'
+	git_gc_days=
+	git_gc_days_repo=:
+	case $- in
+	*f*)
+		git_gc_days_end=':';;
+	*)
+		set -f
+		git_gc_days_end='set +f';;
+	esac
+	for git_gc_days_i in $POSTSYNC_DAYS_GIT_GC_REPO
+	do	if $git_gc_days_repo
+		then	git_gc_days_repo=false
+			is_repository "$git_gc_days_i"
+			git_gc_days_pick=$?
+		else	git_gc_days_repo=:
+			[ $git_gc_days_pick -ne 0 ] || {
+				git_gc_days=$git_gc_days_i
+				break
+			}
+		fi
+	done
+	$git_gc_days_end
+}
 
 postsync_jobs() {
 	[ -n "${POSTSYNC_JOBS:-}" ] || POSTSYNC_JOBS=`nproc` || POSTSYNC_JOBS=
@@ -486,10 +514,17 @@ is_git() {
 	return 1
 }
 
+git_repository() {
+	git_repository=$repository_path/.git
+	test -d "$git_repository"
+}
+
 check_writable() {
 	! test -w "$repository_path" || return 0
 	eerror "Directory of $repository_name repository non-writable. Try:"
-	die "	chown -R $1: $repository_path"
+	eerror "	chown -R -- $1: $repository_path"
+	eerror "	find $repository_path -type d -exec chmod g+s '{}' '+'"
+	exit 1
 }
 
 postsync_skip() {
@@ -509,12 +544,19 @@ call_egencache() {
 }
 
 egencache_options() {
-	[ -n "${POSTSYNC_EGENCACHE_DEFAULT++}" ] || POSTSYNC_EGENCACHE_DEFAULT="
-	** --ignore-default-opts ** --update ** --tolerant
+	[ -n "${POSTSYNC_EGENCACHE_DEFAULT:++}" ] || \
+		POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
 	$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc
 	mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
 	egencache_options=
 	egencache_options_repo=:
+	case $- in
+	*f*)
+		egencache_options_end=':';;
+	*)
+		set -f
+		egencache_options_end='set +f';;
+	esac
 	for egencache_options_i in $POSTSYNC_EGENCACHE_DEFAULT ${POSTSYNC_EGENCACHE-}
 	do	if $egencache_options_repo
 		then	egencache_options_repo=false
@@ -525,6 +567,7 @@ egencache_options() {
 				egencache_options=$egencache_options${egencache_options:+\ }$egencache_options_i
 		fi
 	done
+	$egencache_options_end
 }
 
 rsync_a() {
@@ -533,8 +576,8 @@ rsync_a() {
 }
 
 postsync_sync() {
-	[ -n "${POSTSYNC_SYNC:+}" ] || \
-		POSTSYNC_SYNC:=${SYNC:-rsync://rsync.gentoo.org/gentoo-portage}
+	[ -n "${POSTSYNC_SYNC:++}" ] || \
+		POSTSYNC_SYNC=${SYNC:-rsync://rsync.gentoo.org/gentoo-portage}
 postsync_sync() {
 :
 }

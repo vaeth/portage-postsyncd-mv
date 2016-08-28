@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -u
+only_main=
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/repo.postsync.d/portage-postsyncd-mv.sh} \
+	${1+"$@"}
+git_repository || exit 0
+restart_as_default "$@"
+
+git_gc_days
+set -- "${git_gc_days:-30}" .git/git-gc.date
+! max_days_file "$@" || exit 0
+git_gc . "Calling git-gc for the $repository_name repository" \
+	&& update_days_file "$@"

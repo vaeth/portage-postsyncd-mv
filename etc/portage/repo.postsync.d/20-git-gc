@@ -1,12 +1,12 @@
 #!/usr/bin/env sh
 set -u
 only_main=+
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/lib/gentoo/repo.postsync.functions.sh} \
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
 is_git || exit 0
 restart_as_default "$@"
 
 set -- "${POSTSYNC_DAYS_GIT_GC:-7}" git-gc.date
 ! max_days_file "$@" || exit 0
-git_gc "$repository_path" "Calling git-gc for the $repository_name repository" \
+git_gc . "Calling git-gc for the $repository_name repository" \
 	&& update_days_file "$@"
