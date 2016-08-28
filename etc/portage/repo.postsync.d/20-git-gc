@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -u
 only_main=+
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/repo.postsync.d/portage-postsyncd-mv.sh} \
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
 is_git || exit 0
 restart_as_default "$@"

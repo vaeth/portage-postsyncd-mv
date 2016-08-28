@@ -3,7 +3,7 @@ set -u
 qreinit=${EPREFIX-}/etc/portage/repo.postsync.d/q-reinit
 test -r "$qreinit" && ! test -x "$qreinit" || exit 0
 only_main=
-. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/repo.postsync.d/portage-postsyncd-mv.sh} \
+. ${POSTSYNC_FUNCTIONS:-"${EPREFIX-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
 #restart_as_default "$@"
 einfo "Calling q-reinit for the $repository_name repository"
