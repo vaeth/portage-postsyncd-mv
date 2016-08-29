@@ -110,6 +110,8 @@
 # The repository ** means every repository.
 # Typical example:
 # POSTSYNC_EGENCACHE="local --update-use-local-desc"
+# POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} local --update-pkg-desc-index"
+# POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} gentoo --update-pkg-desc-index"
 # The default is:
 # POSTSYNC_EGENCACHE=""
 
@@ -117,7 +119,7 @@
 # Do not set it unless you want to _remove_ the defaults for some reason.
 # The default is used if this variable is empty or unset; set it e.g. to a
 # space to clear all defaults. However, very likely you want to include
-# at least '** --update' in this variable.
+# at least "** --update" in this variable.
 # POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
 # ${POSTSYNC_MAIN_REPOSITORY} --update-use-local-desc
 # mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
