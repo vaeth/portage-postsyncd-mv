@@ -291,7 +291,7 @@ restart_as() {
 	if [ -z "${POSTSYNC_SHELL:++}" ]
 	then	POSTSYNC_SHELL=`command -v sh 2>/dev/null` && \
 			[ -n "${POSTSYNC_SHELL:++}" ] || \
-			POSTSYNC_SHELL=${EPREFIX-}/bin/sh
+			POSTSYNC_SHELL=${PORTAGE_CONFIGROOT-}/bin/sh
 	fi
 	exec su -p -s "$POSTSYNC_SHELL" -c 'restart_as_name=$1
 shift

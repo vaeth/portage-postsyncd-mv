@@ -37,7 +37,7 @@
 # POSTSYNC_SHELL=/bin/sh
 
 # The file which contains helper functions needed in most scripts
-# POSTSYNC_FUNCTIONS="${EPREFIX}/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh"
+# POSTSYNC_FUNCTIONS="${PORTAGE_CONFIGROOT}/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh"
 
 # The name of the main repository:
 # POSTSYNC_MAIN_REPOSITORY=gentoo
