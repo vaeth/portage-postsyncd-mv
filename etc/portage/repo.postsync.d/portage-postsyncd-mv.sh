@@ -544,10 +544,11 @@ call_egencache() {
 }
 
 egencache_options() {
-	[ -n "${POSTSYNC_EGENCACHE_DEFAULT:++}" ] || \
+	[ -n "${POSTSYNC_EGENCACHE_DEFAULT++}" ] || \
 		POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
-	$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc
-	mv --update-use-local-desc mv --changelog-reversed mv --update-changelog"
+$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
+	[ -n "${POSTSYNC_EGENCACHE++}" ] || \
+		POSTSYNC_EGENCACHE='mv --changelog-reversed mv --update-changelog'
 	egencache_options=
 	egencache_options_repo=:
 	case $- in
@@ -557,7 +558,7 @@ egencache_options() {
 		set -f
 		egencache_options_end='set +f';;
 	esac
-	for egencache_options_i in $POSTSYNC_EGENCACHE_DEFAULT ${POSTSYNC_EGENCACHE-}
+	for egencache_options_i in $POSTSYNC_EGENCACHE_DEFAULT $POSTSYNC_EGENCACHE
 	do	if $egencache_options_repo
 		then	egencache_options_repo=false
 			is_repository "$egencache_options_i"
