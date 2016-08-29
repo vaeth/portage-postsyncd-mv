@@ -1,0 +1,11 @@
+
+post_src_install() {
+	einfo 'Inofficial portage-postsyncd-mv hack:'
+	einfo "Making ${EPREFIX}/etc/portage/repo.postsync.d/q-reinit non-executable"
+	chmod a-x -- "${ED}"/etc/portage/repo.postsync.d/q-reinit || {
+		eerror 'The hack from portage-postsyncd-mv failed'
+		eerror "Please remove the hack ${PORTAGE_CONFIGROOT%/}/etc/portage/env/$CATEGORY/$PN"
+		die 'After removing the hack, retry again'
+	}
+	einfo 'The portage-postsyncd-mv hack succeeded'
+}

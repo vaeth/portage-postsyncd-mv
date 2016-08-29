@@ -257,7 +257,7 @@ die() {
 
 yesno() {
 	case ${1:-n} in
-	[nNFf0]*)
+	[nNfF0-]*|[oO][fF]*)
 		return 1;;
 	esac
 	:
