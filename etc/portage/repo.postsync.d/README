@@ -114,9 +114,9 @@
 # POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} local --update-pkg-desc-index"
 # POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} gentoo --update-pkg-desc-index"
 # POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} mv --changelog-reversed"
-# POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} mv --update-changelog"
+# POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} mv --update-changelogs"
 # The default is:
-# POSTSYNC_EGENCACHE="mv --changelog-reversed mv --update-changelog"
+# POSTSYNC_EGENCACHE="mv --changelog-reversed mv --update-changelogs"
 
 # This is prepended to POSTSYNC_EGENCACHE.
 # Do not set it unless you want to _remove_ the defaults for some reason.

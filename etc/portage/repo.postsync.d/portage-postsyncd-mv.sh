@@ -548,7 +548,7 @@ egencache_options() {
 		POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
 $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 	[ -n "${POSTSYNC_EGENCACHE++}" ] || \
-		POSTSYNC_EGENCACHE='mv --changelog-reversed mv --update-changelog'
+		POSTSYNC_EGENCACHE='mv --changelog-reversed mv --update-changelogs'
 	egencache_options=
 	egencache_options_repo=:
 	case $- in
