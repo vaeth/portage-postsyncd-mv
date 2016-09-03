@@ -66,6 +66,11 @@
 # but if your last syncing is too old, generating metadata can take very long.
 # POSTSYNC_DAYS_CACHE=10
 
+# Independent of POSTSYNC_DAYS_CACHE, the cache is fetched if a file from
+# the following list is younger than the timestamp file. The list is relative
+# to the main repository, and it may contain wildcards.
+# POSTSYNC_COMPARE_LIST='eclass/*.eclass'
+
 # In case the pre-generated metadata cache for the main repository is fetched:
 # Only fetch the data if the fetched data is presumably not older than this
 # number of days

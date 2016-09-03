@@ -336,13 +336,19 @@ current_date() {
 # unless a more complete path is specified) is maximally $days old.
 # $days=0 counts as infinity (always success). Non-numerical $days means never.
 # If $not_exist (in repository_path unless a complete path is specified)
-# is non-empty and non-readable, failure is returned independent of $file
+# is non-empty and non-readable, failure is returned independent of $file.
+# If $not_exist has the special value '' and $days is positive do not check
+# date.
+# After rturn, the variable $max_days_file contains the timestamp or is empty
+# in case of early return.
 max_days_file() {
+	max_days_file=
 	case ${1:-x} in
 	*[!0-9]*)
 		return 1;;
 	esac
 	[ "$1" -ne 0 ] || return 0
+	max_days_file=0
 	[ -z "${3:++}${4:++}" ] || check_readable "$3${4-}" || {
 		einfo "Missing $3${4-}"
 		return 1
@@ -357,6 +363,7 @@ max_days_file() {
 	*[!0-9]*)
 		max_days_file=0;;
 	esac
+	[ $# -ne 3 ] || [ -n "$3" ] || return 0
 	current_date || return 1
 	# 24 * 60 * 60 = 86400 seconds in one day
 	if [ $(( $1 * 86400 )) -gt "$(( $current_date - $max_days_file ))" ]
@@ -572,7 +579,7 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 }
 
 rsync_a() {
-	rsync -ltDHS -Pi --modify-window=1 -r --delete --whole-file \
+	rsync -ltDHS -Pi --modify-window=1 -r --delete \
 		${PORTAGE_QUIET:+-q} -- "$@"
 }
 

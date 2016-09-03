@@ -24,7 +24,35 @@ fetch_cache() {
 	eend $?
 }
 
-! max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" || {
+compare_list() {
+	[ -n "${POSTSYNC_COMPARE_LIST++}" ] ||
+		POSTSYNC_COMPARE_LIST='eclass/*.eclass'
+	[ -n "$POSTSYNC_COMPARE_LIST" ] || return
+	[ -n "$max_days_file" ] || max_days_file 1 "$timefile" '' || return 0
+	cd -- "$repository_path" >/dev/null 2>&1 || return
+	compare_list_end=:
+	case $- in
+	*f*)
+		set +f
+		compare_list_end='set -f';;
+	esac
+	for compare_list_i in $POSTSYNC_COMPARE_LIST
+	do	test -r "$compare_list_i" || continue
+		compare_list=`stat -c '%Y' "$compare_list_i"` || continue
+		case ${compare_list:-x} in
+		*[!0-9]*)
+			continue;;
+		esac
+		[ "$compare_list" -le "$max_days_file" ] || {
+			$compare_list_end
+			return 0
+		}
+	done
+	$compare_list_end
+	return 1
+}
+
+! max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" || compare_list || {
 	einfo "Skipping fetching of metadata for the $repository_name repository"
 	exit 0
 }
