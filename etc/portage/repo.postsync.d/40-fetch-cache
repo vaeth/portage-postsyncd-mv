@@ -53,6 +53,9 @@ compare_list() {
 	return 1
 }
 
+set -- "${POSTSYNC_DAYS_FETCH_CACHE:-2}" fetch-cache.date
+! max_days_file "$@" || exit 0
+
 ! max_days_file "${POSTSYNC_DAYS_CACHE:-10}" "$timefile" || compare_list || {
 	einfo "Skipping fetching of metadata for the $repository_name repository"
 	exit 0
@@ -63,3 +66,5 @@ max_days_file "${POSTSYNC_DAYS_CACHE_MAX:-1}" "$timefile" || {
 	exit 0
 }
 fetch_cache
+
+update_days_file "$@"

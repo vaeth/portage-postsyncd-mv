@@ -7,26 +7,26 @@
 # The following variables are honoured by more tools than these scripts:
 
 # Log errors/warnings?
-# EINFO_LOG=no
+# EINFO_LOG="no"
 
 # Suppress warnings and info output?
-# EINFO_QUIET=no
+# EINFO_QUIET="no"
 
 # Suppress errors?
-# EERROR_QUIET=no
+# EERROR_QUIET="no"
 
 # Be extra verbose in output
-# EINFO_VERBOSE=no
+# EINFO_VERBOSE="no"
 
 # Suppress colors
-# RC_NOCOLOR=no
+# RC_NOCOLOR="no"
 
-# Let portage be quiet
-# PORTAGE_QUIET=
+# Let portage be quiet if nonempty
+# PORTAGE_QUIET=""
 
 # The console type. Fetched by `consoletype` if empty.
 # The type "serial" forces poor output
-# CONSOLETYPE
+# CONSOLETYPE=""
 
 # The permissions of the repositories.
 # As soon as possible, permissions are dropped to those of that user.
@@ -40,7 +40,7 @@
 # POSTSYNC_FUNCTIONS="${PORTAGE_CONFIGROOT}/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh"
 
 # The name of the main repository:
-# POSTSYNC_MAIN_REPOSITORY=gentoo
+# POSTSYNC_MAIN_REPOSITORY="gentoo"
 
 # The name of the mirror from which the pre-generated cache is synced.
 # Depending on your continent, the following choices might be reasonable:
@@ -59,27 +59,37 @@
 # If SYNC is empty or unset, the default is
 # POSTSYNC_SYNC="rsync://rsync.gentoo.org/gentoo-portage"
 
-# The minimal number of days between last update and fetching of the
-# pre-generated metadata cache for the main repository
+# The minimal number of days between two fetchings of pre-calculated metadata
 # (0 means never, and non-numerical values mean every time).
+# Do not set it to a non-numerical value to avoid violating the gentoo policy:
+# One should not fetch more than once every 24 hours.
 # Note that fetching pre-generated metadata takes time and costs traffic,
 # but if your last syncing is too old, generating metadata can take very long.
-# POSTSYNC_DAYS_CACHE=10
+# It is better to put the default even to 2 or even much larger (or to 0).
+# In the worst case, the metadata must be recalculated locally; there is a
+# high probability anyway that this is necessary, since the precalculated data
+# is often behind a new eclass change which makes a recalculation necessary.
+# POSTSYNC_DAYS_FETCH_CACHE="2"
+
+# The minimal number of days between last metadata update/calculation
+# and fetching of the pre-generated metadata cache for the main repository
+# (0 means never, and non-numerical values mean every time).
+# POSTSYNC_DAYS_CACHE="10"
 
 # Independent of POSTSYNC_DAYS_CACHE, the cache is fetched if a file from
 # the following list is younger than the timestamp file. The list is relative
 # to the main repository, and it may contain wildcards.
-# POSTSYNC_COMPARE_LIST='eclass/*.eclass'
+# POSTSYNC_COMPARE_LIST="eclass/*.eclass"
 
 # In case the pre-generated metadata cache for the main repository is fetched:
 # Only fetch the data if the fetched data is presumably not older than this
 # number of days
 # (0 means fetch always, non-numerical values mean never)
-# POSTSYNC_DAYS_CACHE_MAX=1
+# POSTSYNC_DAYS_CACHE_MAX="1"
 
 # The minimal number of days between two calls of git-gc in the main repository
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_GIT_GC=7
+# POSTSYNC_DAYS_GIT_GC="7"
 
 # The minimal number of days between two calls of git-gc in overlays
 # (0 means never, and non-numerical values mean every time).
@@ -131,48 +141,48 @@
 
 # The minimal number of days before syncing glsa again
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_NEWS=1
+# POSTSYNC_DAYS_NEWS="1"
 
 # How deep to clone the glsa git repository (0 or non-numeric is unlimited)
-# POSTSYNC_DEPTH_NEWS=1
+# POSTSYNC_DEPTH_NEWS="1"
 
 # The URL of the glsa git repository
 # POSTSYNC_URL_NEWS="https://anongit.gentoo.org/git/data/gentoo-news.git"
 
 # The minimal number of days before syncing glsa again
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_GLSA=2
+# POSTSYNC_DAYS_GLSA="2"
 
 # How deep to clone the glsa git repository (0 or non-numeric is unlimited)
-# POSTSYNC_DEPTH_GLSA=1
+# POSTSYNC_DEPTH_GLSA="1"
 
 # The URL of the glsa git repository
 # POSTSYNC_URL_GLSA="https://anongit.gentoo.org/git/data/glsa.git"
 
 # The minimal number of days before syncing xml-schema again
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_XML_SCHEMA=30
+# POSTSYNC_DAYS_XML_SCHEMA="30"
 
 # How deep to clone the xml-schema git repository
 # (0 or non-numeric is unlimited)
-# POSTSYNC_DEPTH_XML_SCHEMA=1
+# POSTSYNC_DEPTH_XML_SCHEMA="1"
 
 # The URL of the xml-cschme git repository
 # POSTSYNC_URL_XML_SCHEMA="https://anongit.gentoo.org/git/data/xml-schema.git"
 
 # The minimal number of days before syncing dtd again
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_DTD=30
+# POSTSYNC_DAYS_DTD="30"
 
 # How deep to clone the dtd git repository (0 or non-numeric is unlimited)
-# POSTSYNC_DEPTH_DTD=1
+# POSTSYNC_DEPTH_DTD="1"
 
 # The URL of the dtd git repository
 # POSTSYNC_URL_DTD="https://anongit.gentoo.org/git/data/dtd.git"
 
 # The minimal number of days before syncing projects.xml again
 # (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_PROJECTS_XML=30
+# POSTSYNC_DAYS_PROJECTS_XML="30"
 
 # The URL of the projects.xml file:
 # POSTSYNC_URL_PROJECTS_XML="https://api.gentoo.org/metastructure/projects.xml"
