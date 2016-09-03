@@ -44,6 +44,7 @@ compare_list() {
 			continue;;
 		esac
 		[ "$compare_list" -le "$max_days_file" ] || {
+			einfo "Fetching metadata due to recent $compare_list_i"
 			$compare_list_end
 			return 0
 		}
