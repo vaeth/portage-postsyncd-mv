@@ -164,6 +164,15 @@ ebeginl() {
 	output_l " ${GOOD}*$NORMAL " "${*-} ..." ebeginl
 }
 
+ebeginq() {
+	if yesno "$1"
+	then	shift
+		ebegin "$@"
+	else	shift
+		ebeginl "$@"
+	fi
+}
+
 eend_sub() {
 	if [ "$1" -eq 0 ]
 	then	! einfo_quiet || return 0
@@ -264,15 +273,49 @@ yesno() {
 }
 
 restart_as_default() {
-	restart_as "${POSTSYNC_USER:-portage}" "$@"
+	[ -n "${POSTSYNC_REPO_USER++}" ] || POSTSYNC_REPO_USER='** portage'
+	restart_as_default=
+	restart_as_default_repo=:
+	case $- in
+	*f*)
+		restart_as_default_end=:;;
+	*)
+		set -f
+		restart_as_default_end='set +f';;
+	esac
+	for restart_as_default_i in $POSTSYNC_REPO_USER
+	do	if $restart_as_default_repo
+		then	restart_as_default_repo=false
+			is_repository "$restart_as_default_i"
+			restart_as_default_pick=$?
+		else	restart_as_default_repo=:
+			[ $restart_as_default_pick -ne 0 ] || {
+				restart_as_default=$restart_as_default_i
+				break
+			}
+		fi
+	done
+	$restart_as_default_end
+	restart_as "${restart_as_default:-root}" "$@"
+}
+
+is_valid_user() {
+	case ${1:-/} in
+	*[!a-zA-Z0-9_.,]*)
+		return 1;;
+	esac
+	:
 }
 
 restart_as() {
-	[ x"$1" != x'root' ] || return 0
+	restart_as=${1:-root}
+	shift
+	[ x"$restart_as" != x'root' ] || return 0
+	is_valid_user "$restart_as" || die "Not a valid user: $restart_as"
 	[ "`id -u`" -eq 0 ] || {
 		HOME=$restart_as_home
 		unset restart_as_home
-		check_writable "$1"
+		check_writable "$restart_as"
 		return 0
 	}
 	case $0 in
@@ -280,12 +323,6 @@ restart_as() {
 		restart_as_name=$0;;
 	*)
 		restart_as_name=/etc/portage/repo.postsync.d/${0##*/};;
-	esac
-	restart_as=$1
-	shift
-	case ${restart_as:-/} in
-	*[!a-zA-Z0-9_.,]*)
-		die "Not a valid \$POSTSYNC_USER: $restart_as";;
 	esac
 	eval export "restart_as_home=~$restart_as"
 	if [ -z "${POSTSYNC_SHELL:++}" ]
@@ -434,8 +471,8 @@ git_clone() {
 	local_path "$1"
 	shift
 	if [ -n "${1:++}" ]
-	then	ebeginl "$1"
-	else	ebeginl "Updating $local_path"
+	then	ebeginq "${PORTAGE_QUIET:++}" "$1"
+	else	ebeginq "${PORTAGE_QUIET:++}" "Updating $local_path"
 	fi
 	if test -d "$local_path/.git"
 	then	git -C "$local_path" pull ${PORTAGE_QUIET:+-q} --ff-only \
@@ -454,8 +491,8 @@ git_gc() (
 	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
 		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
-	then	ebeginl "$2"
-	else	ebeginl "Calling git-gc for $local_path"
+	then	ebeginq "${PORTAGE_QUIET:++}" "$2"
+	else	ebeginq "${PORTAGE_QUIET:++}" "Calling git-gc for $local_path"
 	fi
 	eval '{
 		git prune && \
@@ -475,7 +512,7 @@ git_gc_days() {
 	git_gc_days_repo=:
 	case $- in
 	*f*)
-		git_gc_days_end=':';;
+		git_gc_days_end=:;;
 	*)
 		set -f
 		git_gc_days_end='set +f';;
@@ -528,9 +565,8 @@ git_repository() {
 
 check_writable() {
 	! test -w "$repository_path" || return 0
-	eerror "Directory of $repository_name repository non-writable. Try:"
-	eerror "	chown -R -- $1: $repository_path"
-	eerror "	find $repository_path -type d -exec chmod g+s '{}' '+'"
+	eerror "Directory of $repository_name repository non-writable"
+	eerror "Maybe POSTSYNC_CHPERM is not set appropriately"
 	exit 1
 }
 
@@ -560,7 +596,7 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 	egencache_options_repo=:
 	case $- in
 	*f*)
-		egencache_options_end=':';;
+		egencache_options_end=:;;
 	*)
 		set -f
 		egencache_options_end='set +f';;

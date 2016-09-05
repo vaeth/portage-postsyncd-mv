@@ -28,10 +28,37 @@
 # The type "serial" forces poor output
 # CONSOLETYPE=""
 
-# The permissions of the repositories.
-# As soon as possible, permissions are dropped to those of that user.
-# The value "root" means that no permissions are dropped.
-# POSTSYNC_USER=portage
+# First the permissions of the repository directory are set.
+# This is specified by a list of the form
+# "repository dir_perm file_perm user group repository ..."
+# The first matching repository is taken.
+# The repository * means every repository except the main repository.
+# The repository ** means every repository.
+# dir_perm and file_perm should be octal values or non-numbers.
+# If octal values, all dir/file permissions in the repository's directory
+# are set correspodingly, respectively, if they differ.
+# Analogously for user or group (which can be names or ids); an invalid
+# user/group (e.g. "-") means that user/group is not modified.
+# POSTSYNC_CHPERM="** - - portage portage"
+
+# When applying POSTSYNC_CHPERM whether quiet output should be used.
+# This is forced if PORTAGE_QUIET is nonempty.
+# Set this to "yes" if some of your chmod, chown, chgrp utilities
+# does not know the "-v" option (which is not POSIX).
+# POSTSYNC_CHPERM_QUIET="${EINFO_QUIET}"
+
+# The permissions which should be used to access the repositories.
+# As soon as possible, permissions are dropped to the corresponding user.
+# As a sanity check it is verified that the repository is writable by the user.
+# The specification is given by a list of the form
+# "repository user repository user ..."
+# The first matching repository is taken.
+# The repository * means every repository except the main repository.
+# The repository ** means every repository.
+# If the user is "root", no permissions are dropped, of course.
+# A valid user _must_ be specified for every repository
+# (add "** root" if you are not sure).
+# POSTSYNC_REPO_USER="** portage"
 
 # The path to the shell; default is `command -v sh` and if that fails:
 # POSTSYNC_SHELL=/bin/sh
@@ -102,7 +129,7 @@
 # the "normal" handling of git-gc for the main repository (the latter can be
 # done e.g. by setting POSTSYNC_DAYS_GIT_GC=0), because otherwise git-gc might
 # be called twice for the main repository.
-# This feature uses the timestamp file $repository_path/.git/git-gc.date
+# This feature uses the timestamp file ${repository_path}/.git/git-gc.date
 # The default is taken unless you set it to a nonempty value
 # (use e.g. POSTSYNC_DAYS_GIT_GC_REPO=" " to disable the feature).
 # POSTSYNC_DAYS_GIT_GC_REPO="* 30"

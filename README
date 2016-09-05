@@ -31,10 +31,10 @@ location in the main file system.
 
 Configuration:
 
-Change all permissions of your repositories to a (relatively)
-unprivileged user (e.g. "portage") and specify that user in the
-variable POSTSYNC_USER in /etc/portage/make.conf
-(if you omit the latter, the user "portage" will be used).
+There are sane defaults, but if you need a nonstandard setting,
+you can configure a lot of details through POSTSYNC_* variables
+in your /etc/portage/make.conf. Read etc/portage/repo.postsync.d/README
+for the available variables and their default values.
 
 If you use app-portage/portage-utils, it is recommended to call
 
@@ -54,15 +54,9 @@ Of course, it is also possible to switch off the executable bits of some
 files of this project in etc/portage/repo.postsync.d/*
 Then, of course, the corresponding functionality will be switched off.
 The project is written in such a way that this is not harmful.
-(Switching off the egencache functionality for the main repository is a
-bad idea, however; if you do it manually you should update metadata/timestamp.x
-correspondingly as also the prefetch functionality uses that timestamp file.)
 
-Finally, you can configure a lot of details through POSTSYNC_* variables
-in your /etc/portage/make.conf. Read etc/portage/repo.postsync.d/README
-for the available variables and their default values.
-
-Except for calling egencache for your non-main repositories
+Except for setting permissions of your repositories,
+calling egencache for your non-main repositories
 (and q-reinit for all repositories), the scripts do nothing
 unless you configure your main repository to be fetched via git.
 The scripts recognize the latter by checking that the sync-uri

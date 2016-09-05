@@ -1,0 +1,94 @@
+#!/usr/bin/env sh
+set -u
+only_main=
+. ${POSTSYNC_FUNCTIONS:-"${PORTAGE_CONFIGROOT-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
+	${1+"$@"}
+
+[ -n "${POSTSYNC_CHPERM++}" ] || POSTSYNC_CHPERM='** - - portage portage'
+
+chperm_dir=
+chperm_file=
+chperm_user=
+chperm_group=
+chperm_mode=repo
+case $- in
+*f*)
+	chperm_end=:;;
+*)
+	set -f
+	chperm_end='set +f';;
+esac
+for chperm_i in $POSTSYNC_CHPERM
+do	case $chperm_mode in
+	repo)
+		chperm_mode=dir
+		is_repository "$chperm_i"
+		chperm_pick=$?;;
+	dir)
+		chperm_mode=file
+		[ $chperm_pick -ne 0 ] || chperm_dir=$chperm_i;;
+	file)
+		chperm_mode=user
+		[ $chperm_pick -ne 0 ] || chperm_file=$chperm_i;;
+	user)
+		chperm_mode=group
+		[ $chperm_pick -ne 0 ] || chperm_user=$chperm_i;;
+	group)
+		chperm_mode=repo
+		[ $chperm_pick -ne 0 ] || {
+			chperm_group=$chperm_i
+			break
+		};;
+	esac
+done
+$chperm_end
+case $chperm_dir in
+*[!0-7]*)
+	chperm_dir=;;
+	esac
+case $chperm_file in
+[!0-7]*)
+	chperm_file=;;
+esac
+is_valid_user "$chperm_user" || chperm_user=
+is_valid_user "$chperm_group" || chperm_group=
+
+[ -n "$chperm_dir$chperm_file$chperm_user$chperm_group" ] || exit 0
+
+chperm_quiet=:
+[ -n "${PORTAGE_QUIET:++}" ] \
+	|| yesno "${POSTSYNC_CHPERM_QUIET-${EINFO_QUIET:-no}}" \
+	|| chperm_quiet=false
+chperm_verbose=
+$chperm_quiet || chperm_verbose=-v
+
+ebeginq "${chperm_quiet}" \
+	"Setting permissions in the $repository_name repository"
+set -- find "$repository_path"
+chperm_or=
+if [ -n "$chperm_dir" ]
+then	set -- ${1+"$@"} \
+	-type d '!' -perm "$chperm_dir" '!' -type l \
+	-exec chmod $chperm_verbose -- "$chperm_dir" '{}' '+'
+	chperm_or=-o
+fi
+if [ -n "$chperm_file" ]
+then	set -- ${1+"$@"} $chperm_or \
+	-type f '!' -perm "$chperm_file" '!' -type l \
+	-exec chmod $chperm_verbose -- "$chperm_file" '{}' '+'
+	chperm_or=-o
+fi
+if [ -n "$chperm_user" ]
+then	set -- ${1+"$@"} $chperm_or \
+	'!' -user "$chperm_user" \
+	-exec chown -h $chperm_verbose -- "$chperm_user" '{}' '+'
+	chperm_or=-o
+fi
+if [ -n "$chperm_group" ]
+then	set -- ${1+"$@"} $chperm_or \
+	'!' -group "$chperm_group" \
+	-exec chgrp -h $chperm_verbose -- "$chperm_group" '{}' '+'
+	chperm_or=-o
+fi
+"$@"
+eend $?
