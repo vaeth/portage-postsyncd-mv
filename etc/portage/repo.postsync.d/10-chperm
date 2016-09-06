@@ -55,15 +55,12 @@ is_valid_user "$chperm_group" || chperm_group=
 
 [ -n "$chperm_dir$chperm_file$chperm_user$chperm_group" ] || exit 0
 
-chperm_quiet=:
+chperm_verbose=
 [ -n "${PORTAGE_QUIET:++}" ] \
 	|| yesno "${POSTSYNC_CHPERM_QUIET-${EINFO_QUIET:-no}}" \
-	|| chperm_quiet=false
-chperm_verbose=
-$chperm_quiet || chperm_verbose=-v
+	|| chperm_verbose=-v
 
-ebeginq "${chperm_quiet}" \
-	"Setting permissions in the $repository_name repository"
+ebegin "Setting permissions in the $repository_name repository"
 set -- find "$repository_path"
 chperm_or=
 if [ -n "$chperm_dir" ]
