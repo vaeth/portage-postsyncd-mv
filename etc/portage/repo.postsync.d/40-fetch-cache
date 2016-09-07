@@ -24,19 +24,8 @@ fetch_cache() {
 	eend $?
 }
 
-compare_list() {
-	[ -n "${POSTSYNC_COMPARE_LIST++}" ] ||
-		POSTSYNC_COMPARE_LIST='eclass/*.eclass'
-	[ -n "$POSTSYNC_COMPARE_LIST" ] || return
-	[ -n "$max_days_file" ] || max_days_file 1 "$timefile" '' || return 0
-	cd -- "$repository_path" >/dev/null 2>&1 || return
-	compare_list_end=:
-	case $- in
-	*f*)
-		set +f
-		compare_list_end='set -f';;
-	esac
-	for compare_list_i in $POSTSYNC_COMPARE_LIST
+compare_list_sub() {
+	for compare_list_i
 	do	test -r "$compare_list_i" || continue
 		compare_list=`stat -c '%Y' "$compare_list_i"` || continue
 		case ${compare_list:-x} in
@@ -45,12 +34,45 @@ compare_list() {
 		esac
 		[ "$compare_list" -le "$max_days_file" ] || {
 			einfo "Fetching metadata due to recent $compare_list_i"
-			$compare_list_end
 			return 0
 		}
 	done
-	$compare_list_end
 	return 1
+}
+
+compare_list() {
+	: ${POSTSYNC_ECLASSES_MIN:=500}
+	case $POSTSYNC_ECLASSES_MIN in
+	*[!0-9]*)
+		POSTSYNC_ECLASSES_MIN=;;
+	esac
+	[ -z "${POSTSYNC_ECLASSES_MIN:++}" ] || \
+		command -v eclasses.usage >/dev/null 2>&1 \
+		|| POSTSYNC_ECLASSES_MIN=
+	[ -n "${POSTSYNC_COMPARE_LIST:++}${POSTSYNC_ECLASSES_MIN:++}" ] \
+		|| return
+	[ -n "$max_days_file" ] || max_days_file 1 "$timefile" '' || return 0
+	if [ -n "${POSTSYNC_COMPARE_LIST:++}" ]
+	then	cd -- "$repository_path" >/dev/null 2>&1 || return
+		case $- in
+		*f*)
+			set +f
+			compare_list_sub $POSTSYNC_COMPARE_LIST
+			compare_list_res=$?
+			set -f
+			[ $compare_list_res -ne 0 ] || return 0;;
+		*)
+			compare_list_sub $POSTSYNC_COMPARE_LIST || return 0;;
+		esac
+	fi
+	[ -n "${POSTSYNC_ECLASSES_MIN:++}" ] || return
+	ebegin 'Checking for recent eclasses changes'
+	compare_list=`eclasses.usage -1 -o -d "$repository_path" \
+		-t "$max_days_file" -m "$POSTSYNC_ECLASSES_MIN" 2>/dev/null` \
+	eend $? || return
+	[ -n "${compare_list:++}" ] || return
+	einfo "Fetching metadata due to recent $compare_list.eclass"
+	return 0
 }
 
 set -- "${POSTSYNC_DAYS_FETCH_CACHE:-2}" fetch-cache.date

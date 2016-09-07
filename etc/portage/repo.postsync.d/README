@@ -88,14 +88,21 @@
 
 # The minimal number of days between two fetchings of pre-calculated metadata
 # (0 means never, and non-numerical values mean every time).
-# Do not set it to a non-numerical value to avoid violating the gentoo policy:
-# One should not fetch more than once every 24 hours.
+# Do not set it to a non-numerical value to avoid violating the gentoo policy
+# which is to avoid fetching more often than once in 24 hours:
+# Therefore, the value should be at least "1" (note that "0" can be considered
+# as infinity and is ok as well), but not a non-number.
+# However, the default is "2" to be gentle to the gentoo infrastructure.
 # Note that fetching pre-generated metadata takes time and costs traffic,
-# but if your last syncing is too old, generating metadata can take very long.
-# It is better to put the default even to 2 or even much larger (or to 0).
-# In the worst case, the metadata must be recalculated locally; there is a
-# high probability anyway that this is necessary, since the precalculated data
-# is often behind a new eclass change which makes a recalculation necessary.
+# but if your last syncing is too old or if an often used eclass is changed,
+# generating metadata can take *very* long, so that it is usually better to
+# fetch in such a case; this is configured in subsequent variables.
+# However, POSTSYNC_DAYS_FETCH_CACHE is honoured independently of any other
+# configuration to enforce the gentoo policy.
+# In the worst case, the metadata must be recalculated locally; there is some
+# probability that this might be necessary anyway, since the precalculated data
+# is often behind a recent eclass change (forcing a recalculation which might
+# not yet have finished and reached the mirrors).
 # POSTSYNC_DAYS_FETCH_CACHE="2"
 
 # The minimal number of days between last metadata update/calculation
@@ -105,8 +112,18 @@
 
 # Independent of POSTSYNC_DAYS_CACHE, the cache is fetched if a file from
 # the following list is younger than the timestamp file. The list is relative
-# to the main repository, and it may contain wildcards.
+# to the main repository, and it may contain wildcards. You might want to set
 # POSTSYNC_COMPARE_LIST="eclass/*.eclass"
+# unless you use the more sophisticated feature described below. Default:
+# POSTSYNC_COMPARE_LIST=""
+
+# In addition to POSTSYNC_COMPARE_LIST, the cache is fetched if a corresponding
+# call of the eclasses.usage script (provided by this package) detects an
+# eclass younger than the timestamp file and which is used at least the
+# following number of times in ebuilds.
+# Set this variable to a non-number (or empty) to switch off this feature.
+# This feature is also disabled if eclass.usage is not in the $PATH.
+# POSTSYNC_ECLASSES_MIN="500"
 
 # In case the pre-generated metadata cache for the main repository is fetched:
 # Only fetch the data if the fetched data is presumably not older than this

@@ -1,0 +1,209 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+use integer;
+use File::Find ();
+use Getopt::Long 2.24 ();
+#use Pod::Usage ();  # needed for --man, --help, some errors
+
+=head1 NAME
+
+eclasses.usage - Print how often eclasses are used in a certain overlay
+
+The output is in decreasing order of usage (alphabetically for same usage)
+
+=head1 SYNOPSIS
+
+B<eclasses.usage> [options]
+
+To get an extended help, type B<eclasses.usage --man> or B<eclasses.usage -?>
+
+=head1 OPTIONS AND ARGUMENTS
+
+=over 8
+
+=item B<--help> or B<-h>
+
+Display brief help
+
+=item B<--man> or B<-?>
+
+Display extended help as a manpage
+
+=item B<--minimal=>I<number> or B<-m> I<number>
+
+Print only eclasses which are used at least I<number> times
+
+=item B<--dir=>I<path> or B<-d> I<path>
+
+Specify the root of the repository.
+If not specified or empty, I<path> is guessed by heuristics, using B<eix>
+(if available) or B<portageq> and B<POSTSYNC_MAIN_REPOSITORY> (if set)
+
+=item B<--only-names> or B<-o>
+
+Output only the names of the used eclasses, not their usage number
+
+=item B<--first> or B<-1>
+
+Output only the first match
+
+=item B<--time=>I<time> or B<-t> I<time>
+
+Only count eclass if the corresponding eclass/*.eclass exists and has an
+mtime not older than I<time>
+
+=cut
+
+# Options
+
+my $minimal = 0;
+my $portdir = '';
+my $only_names = '';
+my $time = undef;
+my $first = '';
+
+sub pod2usage {
+	require Pod::Usage;
+	&Pod::Usage::pod2usage
+}
+
+sub error {
+	print(STDERR 'eclasses.usage: ', @_, "\n")
+}
+
+sub fatal {
+	&error;
+	exit(1)
+}
+
+# use String::ShellQuote () and return whether successful
+
+{ my $shellquote = undef;  # A closure static variable
+sub use_shellquote {
+	return $shellquote if(defined($shellquote));
+	eval {
+		require String::ShellQuote
+	};
+	$shellquote = !$@
+}}
+
+sub shell_quote_best_effort {
+	(&use_shellquote() ?
+		&String::ShellQuote::shell_quote_best_effort : &join_quoted)
+}
+
+# like join(' ', @_), but shell-quote arguments
+
+sub join_quoted {
+	my @r;
+	for my $i (@_) {
+		my $a = $i;
+		$a =~ s{\'}{\'\\\'\'}g;
+		$a = "'$a'";
+		$a =~ s{(\A|[^\\])\'([\w\-\,\.\:\/]*)\'}{$1$2}gm;
+		push(@r, ($a ne '') ? $a : "''")
+	}
+	join(' ', @r)
+}
+
+{
+	my $devnull = undef;
+sub devnull {
+	$devnull = &shell_quote_best_effort(File::Spec->devnull())
+}}
+
+sub read_var {
+	my ($name) = @_;
+	return $ENV{$name} if(exists($ENV{$name}));
+	my $devnull = &devnull();
+	my $cmd = &shell_quote_best_effot('portageq', 'envvar', $name);
+	my $result = `$cmd 2>$devnull`;
+	$result = '' unless(defined($result));
+	chomp($result);
+	$result
+}
+
+sub get_portdir {
+	return $ENV{'PORTDIR'} if(exists($ENV{'PORTDIR'}));
+	my $devnull = &devnull();
+	my $portdir = `PRINT_APPEND= eix --print PORTDIR 2>$devnull`;
+	return $portdir if(defined($portdir) && ($portdir ne ''));
+	my $eprefix = &read_var('EPREFIX');
+	$eprefix = '' unless(defined($eprefix));
+	my $rootdir = File::Spec->rootdir();
+	my $erootdir = (($eprefix eq '') ? $rootdir :
+		File::Spec->catdir($eprefix, $rootdir));
+	my $main = &read_var('POSTSYNC_MAIN_REPOSITORY');
+	$main = 'gentoo' unless(defined($main) && ($main ne ''));
+	my $cmd = &shell_quote_best_effort('portageq',
+		'get_repo_path', $erootdir, $main);
+	my $result = `$cmd 2>$devnull`;
+	$result = '' unless(defined($result));
+	chomp($result);
+	&fatal('failed to determine directory of main repository')
+		unless($result ne '');
+	&fatal('not a directory: ' . $result) unless(-d $result);
+	$result
+}
+
+sub check_mtime {
+	my ($name, $time) = @_;
+	my $filename = File::Spec->catdir($portdir, 'eclass', $name . '.eclass');
+	my $mtime = ((stat($filename))[9]);
+	(defined($mtime) && ($mtime ne '') && ($mtime >= $time))
+}
+
+Getopt::Long::Configure(qw(gnu_getopt));
+Getopt::Long::GetOptions(
+	'help|h', sub { &pod2usage(0) },
+	'man|?', sub { &pod2usage(-verbose => 2, -exit => 0) },
+	'minimal|m=i', \$minimal,
+	'dir|d=s', \$portdir,
+	'only-names|o', \$only_names,
+	'first|1', \$first,
+	'time|t=i', \$time
+) or &pod2usage(2);
+
+my %eclasses = ();
+
+$portdir = &get_portdir() unless(defined($portdir) && ($portdir ne ''));
+my $dir = File::Spec->catdir($portdir, 'metadata', 'md5-cache');
+&fatal('not a directory: ' . $dir) unless(-d $dir);
+File::Find::find({
+	wanted => sub {
+		return unless(-f $_);
+		open(my $fh, '<', $_) || return;
+		while(<$fh>) {
+		next unless(s{^\_eclasses\_\=}{});
+			my $eclass = '';
+			for my $i (split) {
+				$eclass = !$eclass;
+				next unless($eclass);
+				if(exists($eclasses{$i})) {
+					++$eclasses{$i}
+				} else {
+					$eclasses{$i} = 1
+				}
+			}
+		}
+		close($fh)
+	}
+}, $dir);
+my @eclasses = ();
+for my $i (keys(%eclasses)) {
+	my $count = $eclasses{$i};
+	next unless($count >= $minimal);
+	next if(defined($time) && !&check_mtime($i, $time));
+	push(@eclasses, [ $i, $count ]);
+	last if($first)
+}
+for my $i (sort {
+		(-($a->[1] <=> $b->[1])) || ($a->[0] cmp $b->[0])
+	} @eclasses) {
+	if($only_names) {
+		print($i->[0], "\n")
+	} else {
+		print(join(' ',@$i), "\n")
+	}
+}
