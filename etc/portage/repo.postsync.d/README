@@ -122,7 +122,7 @@
 # eclass younger than the timestamp file and which is used at least the
 # following number of times in ebuilds.
 # Set this variable to a non-number (or empty) to switch off this feature.
-# This feature is also disabled if eclass.usage is not in the $PATH.
+# This feature is also disabled if eclass.usage is not an executable in $PATH
 # POSTSYNC_ECLASSES_MIN="500"
 
 # In case the pre-generated metadata cache for the main repository is fetched:

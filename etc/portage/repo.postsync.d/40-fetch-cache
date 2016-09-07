@@ -68,7 +68,7 @@ compare_list() {
 	[ -n "${POSTSYNC_ECLASSES_MIN:++}" ] || return
 	ebegin 'Checking for recent eclasses changes'
 	compare_list=`eclasses.usage -1 -o -d "$repository_path" \
-		-t "$max_days_file" -m "$POSTSYNC_ECLASSES_MIN" 2>/dev/null` \
+		-t "$max_days_file" -m "$POSTSYNC_ECLASSES_MIN"` \
 	eend $? || return
 	[ -n "${compare_list:++}" ] || return
 	einfo "Fetching metadata due to recent $compare_list.eclass"
