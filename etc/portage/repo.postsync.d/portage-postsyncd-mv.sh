@@ -13,13 +13,18 @@ repository_name=$1
 sync_uri=$2
 repository_path=$3
 
-option_quiet=
-option_verbose=
-[ -z "${PORTAGE_QUIET:++}" ] || {
-	unset EINFO_QUIET EINFO_VERBOSE
-	option_quiet=-q
+init_vars() {
+	option_quiet=
+	option_verbose=
+	[ -z "${PORTAGE_QUIET:++}" ] || {
+		unset EINFO_QUIET EINFO_VERBOSE
+		option_quiet=-q
+	}
+	! yesno "${EINFO_VERBOSE-}" || option_verbose=-v
+init_vars() {
+	:
 }
-! yesno "${EINFO_VERBOSE-}" || option_verbose=-v
+}
 
 output_n() {
 	[ x"$LAST_E_CMD" != x'ebegin' ] || echo
@@ -41,6 +46,7 @@ eoutdent() {
 }
 
 einfo_quiet() {
+	init_vars
 	if yesno "${EINFO_QUIET-}"
 	then
 einfo_quiet() {
@@ -173,6 +179,7 @@ ebeginl() {
 }
 
 ebeginv() {
+	init_vars
 	if [ -n "$option_verbose" ]
 	then	ebeginl "$@"
 	else	ebegin "$@"
@@ -210,6 +217,7 @@ ewend() {
 }
 
 veinfo_verbose() {
+	init_vars
 	if yesno "${EINFO_VERBOSE-}" && ! yesno "${EINFO_QUIET-}"
 	then
 veinfo_verbose() {
@@ -480,6 +488,7 @@ git_clone() {
 	then	ebeginl "$1"
 	else	ebeginl "Updating $local_path"
 	fi
+	init_vars
 	if test -d "$local_path/.git"
 	then	git -C "$local_path" pull $option_quiet --ff-only \
 			${git_clone_depth:+"--depth=$git_clone_depth"}
@@ -500,6 +509,7 @@ git_gc() (
 	then	ebeginl "$2"
 	else	ebeginl "Calling git-gc for $local_path"
 	fi
+	init_vars
 	eval '{
 		git prune && \
 		git repack -a -d && \
@@ -621,6 +631,7 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 }
 
 rsync_a() {
+	init_vars
 	rsync -ltDHS --modify-window=1 -r --delete $option_quiet \
 		${option_verbose:---progress} ${option_verbose:--vi} -- "$@"
 }
