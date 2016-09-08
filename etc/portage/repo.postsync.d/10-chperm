@@ -55,36 +55,31 @@ is_valid_user "$chperm_group" || chperm_group=
 
 [ -n "$chperm_dir$chperm_file$chperm_user$chperm_group" ] || exit 0
 
-chperm_verbose=
-[ -n "${PORTAGE_QUIET:++}" ] \
-	|| yesno "${POSTSYNC_CHPERM_QUIET-${EINFO_QUIET:-no}}" \
-	|| chperm_verbose=-v
-
-ebegin "Setting permissions in the $repository_name repository"
+ebeginv "Setting permissions ${chperm_dir:--}/${chperm_file:--} ${chperm_user:--}:${chperm_group:--} for repository $repository_name"
 set -- find "$repository_path"
 chperm_or=
 if [ -n "$chperm_dir" ]
 then	set -- ${1+"$@"} \
 	-type d '!' -perm "$chperm_dir" '!' -type l \
-	-exec chmod $chperm_verbose -- "$chperm_dir" '{}' '+'
+	-exec chmod $option_verbose -- "$chperm_dir" '{}' '+'
 	chperm_or=-o
 fi
 if [ -n "$chperm_file" ]
 then	set -- ${1+"$@"} $chperm_or \
 	-type f '!' -perm "$chperm_file" '!' -type l \
-	-exec chmod $chperm_verbose -- "$chperm_file" '{}' '+'
+	-exec chmod $option_verbose -- "$chperm_file" '{}' '+'
 	chperm_or=-o
 fi
 if [ -n "$chperm_user" ]
 then	set -- ${1+"$@"} $chperm_or \
 	'!' -user "$chperm_user" \
-	-exec chown -h $chperm_verbose -- "$chperm_user" '{}' '+'
+	-exec chown -h $option_verbose -- "$chperm_user" '{}' '+'
 	chperm_or=-o
 fi
 if [ -n "$chperm_group" ]
 then	set -- ${1+"$@"} $chperm_or \
 	'!' -group "$chperm_group" \
-	-exec chgrp -h $chperm_verbose -- "$chperm_group" '{}' '+'
+	-exec chgrp -h $option_verbose -- "$chperm_group" '{}' '+'
 	chperm_or=-o
 fi
 "$@"

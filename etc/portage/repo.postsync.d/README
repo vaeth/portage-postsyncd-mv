@@ -41,12 +41,6 @@
 # user/group (e.g. "-") means that user/group is not modified.
 # POSTSYNC_CHPERM="** - - portage portage"
 
-# When applying POSTSYNC_CHPERM whether quiet output should be used.
-# This is forced if PORTAGE_QUIET is nonempty.
-# Set this to "yes" if some of your chmod, chown, chgrp utilities
-# does not know the "-v" option (which is not POSIX).
-# POSTSYNC_CHPERM_QUIET="${EINFO_QUIET}"
-
 # The permissions which should be used to access the repositories.
 # As soon as possible, permissions are dropped to the corresponding user.
 # As a sanity check it is verified that the repository is writable by the user.

@@ -13,6 +13,14 @@ repository_name=$1
 sync_uri=$2
 repository_path=$3
 
+option_quiet=
+option_verbose=
+[ -z "${PORTAGE_QUIET:++}" ] || {
+	unset EINFO_QUIET EINFO_VERBOSE
+	option_quiet=-q
+}
+! yesno "${EINFO_VERBOSE-}" || option_verbose=-v
+
 output_n() {
 	[ x"$LAST_E_CMD" != x'ebegin' ] || echo
 	printf '%s' "$1$RC_INDENTATION$2"
@@ -33,7 +41,7 @@ eoutdent() {
 }
 
 einfo_quiet() {
-	if [ -n "${PORTAGE_QUIET:++}" ] || yesno "${EINFO_QUIET-}"
+	if yesno "${EINFO_QUIET-}"
 	then
 einfo_quiet() {
 :
@@ -42,8 +50,8 @@ einfo_quiet() {
 einfo_quiet() {
 	return 1
 }
+		return 1
 	fi
-	einfo_quiet
 }
 
 init_colors() {
@@ -164,12 +172,10 @@ ebeginl() {
 	output_l " ${GOOD}*$NORMAL " "${*-} ..." ebeginl
 }
 
-ebeginq() {
-	if yesno "$1"
-	then	shift
-		ebegin "$@"
-	else	shift
-		ebeginl "$@"
+ebeginv() {
+	if [ -n "$option_verbose" ]
+	then	ebeginl "$@"
+	else	ebegin "$@"
 	fi
 }
 
@@ -204,7 +210,7 @@ ewend() {
 }
 
 veinfo_verbose() {
-	if yesno "${EINFO_VERBOSE-}"
+	if yesno "${EINFO_VERBOSE-}" && ! yesno "${EINFO_QUIET-}"
 	then
 veinfo_verbose() {
 :
@@ -213,8 +219,8 @@ veinfo_verbose() {
 veinfo_verbose() {
 return 1
 }
+		return 1
 	fi
-	veinfo_verbose
 }
 
 veinfo() {
@@ -471,13 +477,13 @@ git_clone() {
 	local_path "$1"
 	shift
 	if [ -n "${1:++}" ]
-	then	ebeginq "${PORTAGE_QUIET:++}" "$1"
-	else	ebeginq "${PORTAGE_QUIET:++}" "Updating $local_path"
+	then	ebeginl "$1"
+	else	ebeginl "Updating $local_path"
 	fi
 	if test -d "$local_path/.git"
-	then	git -C "$local_path" pull ${PORTAGE_QUIET:+-q} --ff-only \
+	then	git -C "$local_path" pull $option_quiet --ff-only \
 			${git_clone_depth:+"--depth=$git_clone_depth"}
-	else	git clone ${PORTAGE_QUIET:+-q} \
+	else	git clone $option_quiet \
 			${git_clone_depth:+"--depth=$git_clone_depth"} \
 			-- "$git_clone_remote" "$local_path"
 	fi || eend $? "Try to remove $local_path" \
@@ -491,8 +497,8 @@ git_gc() (
 	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
 		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
-	then	ebeginq "${PORTAGE_QUIET:++}" "$2"
-	else	ebeginq "${PORTAGE_QUIET:++}" "Calling git-gc for $local_path"
+	then	ebeginl "$2"
+	else	ebeginl "Calling git-gc for $local_path"
 	fi
 	eval '{
 		git prune && \
@@ -501,7 +507,7 @@ git_gc() (
 		git gc --prune=all --aggressive && \
 		git repack -a -d && \
 		git prune
-	}' ${PORTAGE_QUIET:+>/dev/null}
+	}' ${option_quiet:+>/dev/null}
 	eend $?
 )
 
@@ -615,8 +621,8 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 }
 
 rsync_a() {
-	rsync -ltDHS -Pi --modify-window=1 -r --delete \
-		${PORTAGE_QUIET:+-q} -- "$@"
+	rsync -ltDHS --modify-window=1 -r --delete $option_quiet \
+		${option_verbose:---progress} ${option_verbose:--vi} -- "$@"
 }
 
 postsync_sync() {

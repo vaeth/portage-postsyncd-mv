@@ -8,7 +8,7 @@ use Getopt::Long 2.24 ();
 
 =head1 NAME
 
-eclasses.usage - Print how often eclasses are used in a certain overlay
+eclasses.usage - Print how often eclasses are used in a certain repository
 
 The output is in decreasing order of usage (alphabetically for same usage)
 
@@ -16,7 +16,7 @@ The output is in decreasing order of usage (alphabetically for same usage)
 
 B<eclasses.usage> [options]
 
-To get an extended help, type B<eclasses.usage --man> or B<eclasses.usage -?>
+For an extended help type B<eclasses.usage --man> or B<eclasses.usage -?>
 
 =head1 OPTIONS AND ARGUMENTS
 
@@ -52,6 +52,8 @@ Output only the first match
 
 Only count eclass if the corresponding eclass/*.eclass exists and has an
 mtime not older than I<time>
+
+=back
 
 =cut
 
@@ -163,7 +165,8 @@ Getopt::Long::GetOptions(
 	'only-names|o', \$only_names,
 	'first|1', \$first,
 	'time|t=i', \$time
-) or &pod2usage(2);
+) || &pod2usage(2);
+&pod2usage(2) if(@ARGV);
 
 my %eclasses = ();
 
