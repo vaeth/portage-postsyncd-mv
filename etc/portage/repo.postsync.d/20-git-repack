@@ -1,14 +1,12 @@
 #!/usr/bin/env sh
 set -u
-only_main=
+only_main=+
 . ${POSTSYNC_FUNCTIONS:-"${PORTAGE_CONFIGROOT-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
-git_repository || exit 0
+is_git || exit 0
 restart_as_default "$@"
 
-git_gc_days
-[ -n "${git_gc_days:++}" ] || exit 0
-set -- "$git_gc_days" .git/git-gc.date
+set -- "${POSTSYNC_DAYS_GIT_REPACK:-7}" git-repack.date
 ! max_days_file "$@" || exit 0
-git_gc . "Calling git-gc for the $repository_name repository" \
+git_repack . "Calling git-repack for the $repository_name repository" \
 	&& update_days_file "$@"

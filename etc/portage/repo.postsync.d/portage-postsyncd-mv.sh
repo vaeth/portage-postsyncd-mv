@@ -464,12 +464,12 @@ local_path() {
 
 # Usage: git_clone [-g] [--] depth remote local_path [Description]
 # depth 0 or non-numerical means that no --depth argument is passed
-# With option -g, apply git_gc afterwards.
+# With option -g, apply git_repack afterwards.
 git_clone() {
 	if [ x"$1" = x'-g' ]
 	then	shift
-		git_clone_gc=git_gc
-	else	git_clone_gc=:
+		git_clone_repack=git_repack
+	else	git_clone_repack=:
 	fi
 	[ x"$1" != x'--' ] || shift
 	git_clone_depth=${1-}
@@ -496,56 +496,49 @@ git_clone() {
 			${git_clone_depth:+"--depth=$git_clone_depth"} \
 			-- "$git_clone_remote" "$local_path"
 	fi || eend $? "Try to remove $local_path" \
-		&& $git_clone_gc "$local_path"
+		&& $git_clone_repack "$local_path"
 }
 
-# Usage: git_gc dir [message]
-git_gc() (
+# Usage: git_repack dir [message]
+git_repack() (
 	local_path "$1"
 	cd -- "$local_path" >/dev/null || exit 0
 	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
 		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
 	then	ebeginl "$2"
-	else	ebeginl "Calling git-gc for $local_path"
+	else	ebeginl "Calling git-repack for $local_path"
 	fi
 	init_vars
-	eval '{
-		git prune && \
-		git repack -a -d && \
-		git reflog expire --expire=now --all && \
-		git gc --prune=all --aggressive && \
-		git repack -a -d && \
-		git prune
-	}' ${option_quiet:+>/dev/null}
+	eval git repack -a -d ${option_quiet:+>/dev/null}
 	eend $?
 )
 
-git_gc_days() {
-	[ -n "${POSTSYNC_DAYS_GIT_GC_REPO:++}" ] || \
-		POSTSYNC_DAYS_GIT_GC_REPO='* 30'
-	git_gc_days=
-	git_gc_days_repo=:
+git_repack_days() {
+	[ -n "${POSTSYNC_DAYS_GIT_REPACK_REPO:++}" ] || \
+		POSTSYNC_DAYS_GIT_REPACK_REPO='* 30'
+	git_repack_days=
+	git_repack_days_repo=:
 	case $- in
 	*f*)
-		git_gc_days_end=:;;
+		git_repack_days_end=:;;
 	*)
 		set -f
-		git_gc_days_end='set +f';;
+		git_repack_days_end='set +f';;
 	esac
-	for git_gc_days_i in $POSTSYNC_DAYS_GIT_GC_REPO
-	do	if $git_gc_days_repo
-		then	git_gc_days_repo=false
-			is_repository "$git_gc_days_i"
-			git_gc_days_pick=$?
-		else	git_gc_days_repo=:
-			[ $git_gc_days_pick -ne 0 ] || {
-				git_gc_days=$git_gc_days_i
+	for git_repack_days_i in $POSTSYNC_DAYS_GIT_REPACK_REPO
+	do	if $git_repack_days_repo
+		then	git_repack_days_repo=false
+			is_repository "$git_repack_days_i"
+			git_repack_days_pick=$?
+		else	git_repack_days_repo=:
+			[ $git_repack_days_pick -ne 0 ] || {
+				git_repack_days=$git_repack_days_i
 				break
 			}
 		fi
 	done
-	$git_gc_days_end
+	$git_repack_days_end
 }
 
 postsync_jobs() {

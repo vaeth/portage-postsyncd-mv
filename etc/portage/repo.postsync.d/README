@@ -125,25 +125,25 @@
 # (0 means fetch always, non-numerical values mean never)
 # POSTSYNC_DAYS_CACHE_MAX="1"
 
-# The minimal number of days between two calls of git-gc in the main repository
-# (0 means never, and non-numerical values mean every time)
-# POSTSYNC_DAYS_GIT_GC="7"
+# The minimal number of days between two calls of git-repack in the
+# main repository (0 means never, and non-numerical values mean every time)
+# POSTSYNC_DAYS_GIT_REPACK="7"
 
-# The minimal number of days between two calls of git-gc in overlays
+# The minimal number of days between two calls of git-repack in overlays
 # (0 means never, and non-numerical values mean every time).
 # This is a list of the form
 # "repository days repository days ..."
 # The repository * means every repository except the main repository.
 # The repository ** means every repository.
-# The first matching repository is taken; git-gc is omitted if none matches.
+# The first matching repository is taken; git-repack is omitted if none matches.
 # It is not a good idea to specify the main repository here unless you disable
-# the "normal" handling of git-gc for the main repository (the latter can be
-# done e.g. by setting POSTSYNC_DAYS_GIT_GC=0), because otherwise git-gc might
-# be called twice for the main repository.
-# This feature uses the timestamp file ${repository_path}/.git/git-gc.date
+# the "normal" handling of git-repack for the main repository (the latter can
+# be done e.g. by setting POSTSYNC_DAYS_GIT_REPACK=0), because otherwise
+# git-repack might be called twice for the main repository.
+# This feature uses the timestamp file ${repository_path}/.git/git-repack.date
 # The default is taken unless you set it to a nonempty value
-# (use e.g. POSTSYNC_DAYS_GIT_GC_REPO=" " to disable the feature).
-# POSTSYNC_DAYS_GIT_GC_REPO="* 30"
+# (use e.g. POSTSYNC_DAYS_GIT_REPACK_REPO=" " to disable the feature).
+# POSTSYNC_DAYS_GIT_REPACK_REPO="* 30"
 
 # The number to use for --jobs when calling egencache.
 # The empty value (default) means the number of processors.

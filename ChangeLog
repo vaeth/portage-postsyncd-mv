@@ -1,0 +1,131 @@
+# ChangeLog for portage-postsyncd-mv
+
+*portage-postsyncd-mv-4.01:
+	Martin Väth <martin at mvath.de>:
+	- IMPORTANT: When you upgrade from a previous version, remove
+	  $PORTDIR/local/timestamp/git-gc.date
+	  (where $PORTDIR is the path to your main repository) and all
+	  $REPO/.git/git-gc.date
+	  (where $REPO is the path to your local overlays/repositories)
+	- IMPORTANT: There are renames of configuration variables:
+	  POSTSYNC_DAYS_GIT_GC_REPO -> POSTSYNC_DAYS_GIT_REPACK_REPO
+	  POSTSYNC_DAYS_GIT_GC -> POSTSYNC_DAYS_GIT_REPACK
+	- IMPORTANT: It might be necessary to remove your previous repositories
+	  and to refetch them: Pruning removes from some repositories way too
+	  much history. In particular, this is the case for the main gentoo
+	  repository
+	- Rename 20-git-gc -> 20-git-repack
+	- Rename 20-git-gc-repo -> 20-git-repack-repo
+	- Add ChangeLog
+
+*portage-postsyncd-mv-3.06:
+	Martin Väth <martin at mvath.de>:
+	- Introduce init_vars
+
+*portage-postsyncd-mv-3.05:
+	Martin Väth <martin at mvath.de>:
+	- Remove POSTSYNC_CHPERM_QUIET; use EINFO_VERBOSE instead
+	- Minor output changes
+
+*portage-postsyncd-mv-3.04:
+	Martin Väth <martin at mvath.de>:
+	- Do not suppress error message of eclasses.usage
+
+*portage-postsyncd-mv-3.03:
+	Martin Väth <martin at mvath.de>:
+	- Provide eclasses.usage and support POSTSYNC_ECLASSES_MIN
+
+*portage-postsyncd-mv-3.02:
+	Martin Väth <martin at mvath.de>:
+	- No newline at beginning of chperm
+
+*portage-postsyncd-mv-3.01:
+	Martin Väth <martin at mvath.de>:
+	- IMPORTANT: Change meaning of POSTSYNC_REPO_USER
+	  This is now a list
+	- Support POSTSYNC_CHPERM
+
+*portage-postsyncd-mv-2.12:
+	Martin Väth <martin at mvath.de>:
+	- Support POSTSYNC_DAYS_FETCH_CACHE
+
+*portage-postsyncd-mv-2.11:
+	Martin Väth <martin at mvath.de>:
+	- Be verbose in reasons for fetching metadata
+
+*portage-postsyncd-mv-2.10:
+	Martin Väth <martin at mvath.de>:
+	- Add POSTSYNC_COMPARE_LIST
+
+*portage-postsyncd-mv-2.09:
+	Martin Väth <martin at mvath.de>:
+	- Fix typo in --update-changelogs
+
+*portage-postsyncd-mv-2.08:
+	Martin Väth <martin at mvath.de>:
+	- Improve POSTSYNC_EGENCACHE* defaults
+	- Cosmetics in hack file
+
+*portage-postsyncd-mv-2.07:
+	Martin Väth <martin at mvath.de>:
+	- Replace EPREFIX by PORTAGE_CONFIGROOT
+
+*portage-postsyncd-mv-2.06:
+	Martin Väth <martin at mvath.de>:
+	-  Improve yesno()
+	-  Add hack for app-portage/portage-utils
+
+*portage-postsyncd-mv-2.05:
+	Martin Väth <martin at mvath.de>:
+	- Improve POSTSYNC_EGENCACHE documentation
+
+*portage-postsyncd-mv-2.04:
+	Martin Väth <martin at mvath.de>:
+	- Treat empty POSTSYNC_DAYS_GIT_GC_REPO match correctly
+
+*portage-postsyncd-mv-2.03:
+	Martin Väth <martin at mvath.de>:
+	- Fix POSTSYNC_FUNCTIONS default
+
+*portage-postsyncd-mv-2.02:
+	Martin Väth <martin at mvath.de>:
+	- Support POSTSYNC_DAYS_GIT_GC_REPO
+	- Move function file to repo.postsync.d
+
+*portage-postsyncd-mv-2.01:
+	Martin Väth <martin at mvath.de>:
+	- Introduce git-gc-other
+	- Improve output
+	- Fix HOME
+	- New ** defaults
+
+*portage-postsyncd-mv-2.00:
+	Martin Väth <martin at mvath.de>:
+	- IMPORTANT: When you upgrade from a previous version, remove
+	  $PORTDIR/{metadata/{dtd,glsa,news,xml-schema},/local/timestamps}
+	  (where $PORTDIR is the path to your main repository)
+	- Fix timestamp handling
+	- Fix downloads
+
+*portage-postsyncd-mv-1.02:
+	Martin Väth <martin at mvath.de>:
+	- Check for git, not for parent directory
+
+*portage-postsyncd-mv-1.01:
+	Martin Väth <martin at mvath.de>:
+	- Sync xml-schema
+	- improve order
+
+*portage-postsyncd-mv-1.00:
+	Martin Väth <martin at mvath.de>:
+	- Remove POSTSYNC_FUNCTIONS_SH interface
+	- Improve output
+
+*portage-postsyncd-mv-0.02:
+	Martin Väth <martin at mvath.de>:
+	- Some Bourne Shell compatibility
+
+*portage-postsyncd-mv-0.01:
+	Martin Väth <martin at mvath.de>:
+	- Initial version
+

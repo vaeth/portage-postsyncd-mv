@@ -93,7 +93,7 @@ Specify sync-depth = 1 if you are not interested in any ChangeLogs:
 This will need half of the disk space (or even less in some future).
 
 However, the scripts in this project will also regularly recompress your
-git history (with git-gc and related commands)  so that it needs less disk
+git history (with git-repack and related commands) so that it needs less disk
 space. The latter takes some time, of course. As mentioned above, read
 etc/portage/repo.postsync.d/README to learn how to configure such details.
 
