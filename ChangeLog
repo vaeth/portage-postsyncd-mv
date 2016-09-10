@@ -1,5 +1,12 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.2.0:
+	Martin Väth <martin at mvath.de>:
+	- Change version scheme to match eclasses.usage perl versioning
+	- Add zsh completion file for eclasses.usage
+	- Add eclasses.usage --version -V
+	- Add eclasses.usage --print-dir -D
+
 *portage-postsyncd-mv-4.01:
 	Martin Väth <martin at mvath.de>:
 	- IMPORTANT: When you upgrade from a previous version, remove

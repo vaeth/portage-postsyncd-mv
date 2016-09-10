@@ -1,0 +1,11 @@
+#compdef eclasses.usage
+_arguments -s -S : \
+'(1 * -)'{'--help','-h'}'[print a brief help]' \
+'(1 * -)'{'--man','-\\?'}'[show extended help as a manpage]' \
+'(1 * -)'{'--version','-V'}'[print version]' \
+{'(--minimal)-m+','(-m)--minimal='}'[only eclasses used specified MINIMAL times]:minimal:(1 500)' \
+{'(--dir)-d+','(-d)--dir='}'[specify checked repository]:path:_files -/' \
+{'(--print-dir)-D','(-D)--print-dir'}'[print directory and exit]' \
+{'(--only-names)-o','(-o)--only-names'}'[output only eclasses names]' \
+{'(--first)-1','(-1)--first'}'[output only the first match]' \
+{'(--time)-t+','(-t)--time='}'[only eclasses since specified seconds since epoch]:seconds since epoch:(0)' \

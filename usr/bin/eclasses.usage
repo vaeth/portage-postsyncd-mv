@@ -1,10 +1,15 @@
 #!/usr/bin/env perl
+require 5.006001;
+our $VERSION = 'v4.2.0';
+eval 'package Eclasses $VERSION' if($] ge '5.012');
 use warnings;
 use strict;
 use integer;
 use File::Find ();
 use Getopt::Long 2.24 ();
 #use Pod::Usage ();  # needed for --man, --help, some errors
+
+my $name = 'eclasses.usage';
 
 =head1 NAME
 
@@ -30,6 +35,10 @@ Display brief help
 
 Display extended help as a manpage
 
+=item B<--version> or B<-V>
+
+Print version number
+
 =item B<--minimal=>I<number> or B<-m> I<number>
 
 Print only eclasses which are used at least I<number> times
@@ -38,7 +47,12 @@ Print only eclasses which are used at least I<number> times
 
 Specify the root of the repository.
 If not specified or empty, I<path> is guessed by heuristics, using B<eix>
-(if available) or B<portageq> and B<POSTSYNC_MAIN_REPOSITORY> (if set)
+(if available) B<PORTDIR> (if set), B<portageq> and
+B<POSTSYNC_MAIN_REPOSITORY> (if set)
+
+=item B<--print-dir> or B<-D>
+
+Print the directory used for B<--dir> to stdout (without a newline) and exit
 
 =item B<--only-names> or B<-o>
 
@@ -64,10 +78,16 @@ my $portdir = '';
 my $only_names = '';
 my $time = undef;
 my $first = '';
+my $printdir = '';
 
 sub pod2usage {
 	require Pod::Usage;
 	&Pod::Usage::pod2usage
+}
+
+sub version {
+	print($name, ' ', $VERSION, "\n");
+	exit(0)
 }
 
 sub error {
@@ -145,7 +165,6 @@ sub get_portdir {
 	chomp($result);
 	&fatal('failed to determine directory of main repository')
 		unless($result ne '');
-	&fatal('not a directory: ' . $result) unless(-d $result);
 	$result
 }
 
@@ -160,8 +179,10 @@ Getopt::Long::Configure(qw(gnu_getopt));
 Getopt::Long::GetOptions(
 	'help|h', sub { &pod2usage(0) },
 	'man|?', sub { &pod2usage(-verbose => 2, -exit => 0) },
+	'version|V', \&version,
 	'minimal|m=i', \$minimal,
 	'dir|d=s', \$portdir,
+	'print-dir|D', \$printdir,
 	'only-names|o', \$only_names,
 	'first|1', \$first,
 	'time|t=i', \$time
@@ -171,6 +192,10 @@ Getopt::Long::GetOptions(
 my %eclasses = ();
 
 $portdir = &get_portdir() unless(defined($portdir) && ($portdir ne ''));
+if($printdir) {
+	print($portdir);
+	exit(0)
+}
 my $dir = File::Spec->catdir($portdir, 'metadata', 'md5-cache');
 &fatal('not a directory: ' . $dir) unless(-d $dir);
 File::Find::find({

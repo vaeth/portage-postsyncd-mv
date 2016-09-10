@@ -26,8 +26,8 @@ Installation:
 
 Emerge the app-portage/portage-postsyncd-mv ebuild from the mv overlay.
 Alternatively, copy all files from the subdirectories to their corresponding
-location in the main file system.
-
+location in the main file system (usr/share/zsh/site-functions can mean any
+directory from your zsh's $fpath)
 
 Configuration:
 
