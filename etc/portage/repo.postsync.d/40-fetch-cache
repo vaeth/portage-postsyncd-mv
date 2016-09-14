@@ -11,14 +11,14 @@ timefile=$repository_path$timerump
 
 fetch_timestamp() {
 	postsync_sync
-	ebegin "Fetching metadata timestamp for the $repository_name repository"
+	ebeginl "Fetching metadata timestamp for the $repository_name repository"
 	rsync_a "$POSTSYNC_SYNC$timerump" "$timefile"
 	eend $?
 }
 
 fetch_cache() {
 	postsync_sync
-	ebegin "Fetching pre-generated metadata for the $repository_name repository"
+	ebeginl "Fetching pre-generated metadata for the $repository_name repository"
 	fetch_cache=/metadata/md5-cache
 	rsync_a "$POSTSYNC_SYNC$fetch_cache" "$repository_path$fetch_cache"
 	eend $?

@@ -9,7 +9,7 @@ restart_as_default "$@"
 set -- "${POSTSYNC_DAYS_PROJECTS_XML:-30}" projects.xml.date \
 	metadata/projects.xml
 ! max_days_file "$@" || exit 0
-ebegin 'Updating projects.xml'
+ebeginl 'Updating projects.xml'
 wget ${PORTAGE_QUIET:+-q} -P "$repository_path/metadata/" -N \
 	"${POSTSYNC_URL_PROJECTS_XML:-https://api.gentoo.org/metastructure/projects.xml}"
 eend $? && update_days_file "$@"

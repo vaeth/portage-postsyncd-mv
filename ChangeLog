@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.2.1:
+	Martin Väth <martin at mvath.de>:
+	- Output newline when fetching with rsync or wget
+
 *portage-postsyncd-mv-4.2.0:
 	Martin Väth <martin at mvath.de>:
 	- Change version scheme to match eclasses.usage perl versioning
