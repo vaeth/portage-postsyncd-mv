@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.2.2:
+	Martin Väth <martin at mvath.de>:
+	- internal: Avoid unnecessary subshell
+
 *portage-postsyncd-mv-4.2.1:
 	Martin Väth <martin at mvath.de>:
 	- Output newline when fetching with rsync or wget
@@ -22,9 +26,9 @@
 	  POSTSYNC_DAYS_GIT_GC_REPO -> POSTSYNC_DAYS_GIT_REPACK_REPO
 	  POSTSYNC_DAYS_GIT_GC -> POSTSYNC_DAYS_GIT_REPACK
 	- IMPORTANT: It might be necessary to remove your previous repositories
-	  and to refetch them: Pruning removes from some repositories way too
-	  much history. In particular, this is the case for the main gentoo
-	  repository
+	  and to refetch them: Pruning did remove from some repositories way
+	  too much history. In particular, this was the case for the main
+	  gentoo repository
 	- Rename 20-git-gc -> 20-git-repack
 	- Rename 20-git-gc-repo -> 20-git-repack-repo
 	- Add ChangeLog

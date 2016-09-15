@@ -458,7 +458,7 @@ local_path() {
 	.)
 		local_path=$repository_path;;
 	*)
-		local_path=$repository_path/${local_path%./};;
+		local_path=$repository_path/${local_path%/.};;
 	esac
 }
 
@@ -500,19 +500,16 @@ git_clone() {
 }
 
 # Usage: git_repack dir [message]
-git_repack() (
+git_repack() {
 	local_path "$1"
-	cd -- "$local_path" >/dev/null || exit 0
-	export LC_ALL=C LANG=C LC_TIME=C LC_CTYPE=C LC_NUMERIC=C LC_COLLATE=C \
-		LC_NAME=C LC_MESSAGES=C LC_IDENTIFICATION=C
 	if [ -n "${2:++}" ]
 	then	ebeginl "$2"
 	else	ebeginl "Calling git-repack for $local_path"
 	fi
 	init_vars
-	eval git repack -a -d ${option_quiet:+>/dev/null}
+	eval git -C \"\$local_path\" repack -a -d ${option_quiet:+>/dev/null}
 	eend $?
-)
+}
 
 git_repack_days() {
 	[ -n "${POSTSYNC_DAYS_GIT_REPACK_REPO:++}" ] || \
