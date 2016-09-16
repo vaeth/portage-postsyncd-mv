@@ -1,5 +1,10 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.2.3:
+	Martin Väth <martin at mvath.de>:
+	- eclasses.usage: support "man" arg, force utf8 encoding
+	- eclasses.usage: internal: Check require at compile time. Fix use
+
 *portage-postsyncd-mv-4.2.2:
 	Martin Väth <martin at mvath.de>:
 	- internal: Avoid unnecessary subshell

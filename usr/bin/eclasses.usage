@@ -1,15 +1,19 @@
 #!/usr/bin/env perl
-require 5.006001;
-our $VERSION = 'v4.2.0';
+BEGIN { require 5.006_001 }
+our $VERSION = 'v4.2.3';
 eval 'package Eclasses $VERSION' if($] ge '5.012');
 use warnings;
 use strict;
 use integer;
 use File::Find ();
+use File::Spec ();
 use Getopt::Long 2.24 ();
 #use Pod::Usage ();  # needed for --man, --help, some errors
+#use String::ShellQuote ();  # not mandatory but recommended: poor fallback
 
 my $name = 'eclasses.usage';
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -19,19 +23,19 @@ The output is in decreasing order of usage (alphabetically for same usage)
 
 =head1 SYNOPSIS
 
-B<eclasses.usage> [options]
+B<eclasses.usage> [options] [man|help]
 
-For an extended help type B<eclasses.usage --man> or B<eclasses.usage -?>
+For an extended help type B<eclasses.usage man>
 
 =head1 OPTIONS AND ARGUMENTS
 
 =over 8
 
-=item B<--help> or B<-h>
+=item B<--help> or B<-h> or B<help>
 
 Display brief help
 
-=item B<--man> or B<-?>
+=item B<--man> or B<-?> or B<man>
 
 Display extended help as a manpage
 
@@ -68,6 +72,15 @@ Only count eclass if the corresponding eclass/*.eclass exists and has an
 mtime not older than I<time>
 
 =back
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright Martin VE<auml>th
+This program is under the GPL v2 License
+
+=head1 AUTHOR
+
+Martin VE<auml>th E<lt>martin@mvath.deE<gt>
 
 =cut
 
@@ -139,7 +152,7 @@ sub read_var {
 	my ($name) = @_;
 	return $ENV{$name} if(exists($ENV{$name}));
 	my $devnull = &devnull();
-	my $cmd = &shell_quote_best_effot('portageq', 'envvar', $name);
+	my $cmd = &shell_quote_best_effort('portageq', 'envvar', $name);
 	my $result = `$cmd 2>$devnull`;
 	$result = '' unless(defined($result));
 	chomp($result);
@@ -151,7 +164,7 @@ sub get_portdir {
 	my $devnull = &devnull();
 	my $portdir = `PRINT_APPEND= eix --print PORTDIR 2>$devnull`;
 	return $portdir if(defined($portdir) && ($portdir ne ''));
-	my $eprefix = &read_var('EPREFIX');
+	my $eprefix = &read_var('EROOT');
 	$eprefix = '' unless(defined($eprefix));
 	my $rootdir = File::Spec->rootdir();
 	my $erootdir = (($eprefix eq '') ? $rootdir :
@@ -187,7 +200,11 @@ Getopt::Long::GetOptions(
 	'first|1', \$first,
 	'time|t=i', \$time
 ) || &pod2usage(2);
-&pod2usage(2) if(@ARGV);
+if(@ARGV) {
+	&pod2usage(-verbose => 2, -exit => 0) if($ARGV[0] =~ m{^[mM?]});
+	&pod2usage(0) if($ARGV[0] =~ m{^[hH]});
+	&pod2usage(2)
+}
 
 my %eclasses = ();
 
