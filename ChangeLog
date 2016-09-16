@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.3.0:
+	Martin Väth <martin at mvath.de>:
+	- eclasses.usage: use File::Which if available
+
 *portage-postsyncd-mv-4.2.3:
 	Martin Väth <martin at mvath.de>:
 	- eclasses.usage: support "man" arg, force utf8 encoding

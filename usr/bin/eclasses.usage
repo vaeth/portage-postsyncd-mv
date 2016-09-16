@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 BEGIN { require 5.006_001 }
-our $VERSION = 'v4.2.3';
-eval 'package Eclasses $VERSION' if($] ge '5.012');
+our $VERSION = 'v4.3.0';
+eval "package Eclasses $VERSION" if($] ge '5.012');
 use warnings;
 use strict;
 use integer;
@@ -10,6 +10,7 @@ use File::Spec ();
 use Getopt::Long 2.24 ();
 #use Pod::Usage ();  # needed for --man, --help, some errors
 #use String::ShellQuote ();  # not mandatory but recommended: poor fallback
+#use File::Which ();  # not mandatory but recommended; there are fallbacks
 
 my $name = 'eclasses.usage';
 
@@ -104,7 +105,7 @@ sub version {
 }
 
 sub error {
-	print(STDERR 'eclasses.usage: ', @_, "\n")
+	print(STDERR $name, ': ', @_, "\n")
 }
 
 sub fatal {
@@ -114,7 +115,7 @@ sub fatal {
 
 # use String::ShellQuote () and return whether successful
 
-{ my $shellquote = undef;  # A closure static variable
+{ my $shellquote = undef;
 sub use_shellquote {
 	return $shellquote if(defined($shellquote));
 	eval {
@@ -145,25 +146,60 @@ sub join_quoted {
 {
 	my $devnull = undef;
 sub devnull {
+	return $devnull if(defined($devnull));
 	$devnull = &shell_quote_best_effort(File::Spec->devnull())
 }}
 
+# use File::Which module
+
+{
+	my $which = undef;
+sub which_which {
+	return $which if(defined($which));
+	eval {
+		require File::Which
+	};
+	$which = ($@ ? '' : 1)
+}}
+
+sub have_prg {
+	my ($a) = @_;
+	if(&which_which()) {
+		return defined(File::Which::which($a))
+	}
+	(system(&shell_quote_best_effort('command', '-v', $a) . ' >'
+		. &devnull() . ' 2>&1') == 0)
+}
+
+# Check whether eix is available. If yes, also export PRINT_APPEND=
+{
+	my $have_eix = undef;
+sub have_eix {
+	return $have_eix if(defined($have_eix));
+	$have_eix = &have_prg('eix');
+	$ENV{'PRINT_APPEND'} = '' if($have_eix);
+	$have_eix
+}}
+
 sub read_var {
-	my ($name) = @_;
-	return $ENV{$name} if(exists($ENV{$name}));
-	my $devnull = &devnull();
-	my $cmd = &shell_quote_best_effort('portageq', 'envvar', $name);
-	my $result = `$cmd 2>$devnull`;
+	my ($varname) = @_;
+	return $ENV{$varname} if(exists($ENV{$varname}));
+	my $have_eix = &have_eix();
+	my $cmd = &shell_quote_best_effort(($have_eix ?
+		('eix', '--print') : ('portageq', 'envvar')), $varname)
+		. ' 2>' . &devnull();
+	my $result = `$cmd`;
 	$result = '' unless(defined($result));
-	chomp($result);
+	chomp($result) unless($have_eix);
 	$result
 }
 
 sub get_portdir {
 	return $ENV{'PORTDIR'} if(exists($ENV{'PORTDIR'}));
-	my $devnull = &devnull();
-	my $portdir = `PRINT_APPEND= eix --print PORTDIR 2>$devnull`;
-	return $portdir if(defined($portdir) && ($portdir ne ''));
+	if(&have_eix()) {
+		my $portdir = &read_var('PORTDIR');
+		return $portdir if($portdir ne '')
+	}
 	my $eprefix = &read_var('EROOT');
 	$eprefix = '' unless(defined($eprefix));
 	my $rootdir = File::Spec->rootdir();
@@ -172,8 +208,9 @@ sub get_portdir {
 	my $main = &read_var('POSTSYNC_MAIN_REPOSITORY');
 	$main = 'gentoo' unless(defined($main) && ($main ne ''));
 	my $cmd = &shell_quote_best_effort('portageq',
-		'get_repo_path', $erootdir, $main);
-	my $result = `$cmd 2>$devnull`;
+			'get_repo_path', $erootdir, $main)
+		. ' 2>' . &devnull();
+	my $result = `$cmd`;
 	$result = '' unless(defined($result));
 	chomp($result);
 	&fatal('failed to determine directory of main repository')
@@ -182,8 +219,8 @@ sub get_portdir {
 }
 
 sub check_mtime {
-	my ($name, $time) = @_;
-	my $filename = File::Spec->catdir($portdir, 'eclass', $name . '.eclass');
+	my ($eclass, $time) = @_;
+	my $filename = File::Spec->catdir($portdir, 'eclass', $eclass . '.eclass');
 	my $mtime = ((stat($filename))[9]);
 	(defined($mtime) && ($mtime ne '') && ($mtime >= $time))
 }
