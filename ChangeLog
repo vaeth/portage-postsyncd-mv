@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.3.1:
+	Martin Väth <martin at mvath.de>:
+	- eclasses.usage: fix catdir->catfile
+
 *portage-postsyncd-mv-4.3.0:
 	Martin Väth <martin at mvath.de>:
 	- eclasses.usage: use File::Which if available

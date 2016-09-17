@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 BEGIN { require 5.006_001 }
-our $VERSION = 'v4.3.0';
+our $VERSION = 'v4.3.1';
 eval "package Eclasses $VERSION" if($] ge '5.012');
 use warnings;
 use strict;
@@ -220,7 +220,8 @@ sub get_portdir {
 
 sub check_mtime {
 	my ($eclass, $time) = @_;
-	my $filename = File::Spec->catdir($portdir, 'eclass', $eclass . '.eclass');
+	my $filename = File::Spec->catfile($portdir, 'eclass',
+		$eclass . '.eclass');
 	my $mtime = ((stat($filename))[9]);
 	(defined($mtime) && ($mtime ne '') && ($mtime >= $time))
 }
