@@ -28,10 +28,7 @@ compare_list_sub() {
 	for compare_list_i
 	do	test -r "$compare_list_i" || continue
 		compare_list=`stat -c '%Y' "$compare_list_i"` || continue
-		case ${compare_list:-x} in
-		*[!0-9]*)
-			continue;;
-		esac
+		is_number "$compare_list" || continue
 		[ "$compare_list" -le "$max_days_file" ] || {
 			einfo "Fetching metadata due to recent $compare_list_i"
 			return 0
@@ -42,10 +39,7 @@ compare_list_sub() {
 
 compare_list() {
 	: ${POSTSYNC_ECLASSES_MIN:=500}
-	case $POSTSYNC_ECLASSES_MIN in
-	*[!0-9]*)
-		POSTSYNC_ECLASSES_MIN=;;
-	esac
+	is_number "$POSTSYNC_ECLASSES_MIN" || POSTSYNC_ECLASSES_MIN=
 	[ -z "${POSTSYNC_ECLASSES_MIN:++}" ] || \
 		command -v eclasses.usage >/dev/null 2>&1 \
 		|| POSTSYNC_ECLASSES_MIN=

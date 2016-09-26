@@ -315,7 +315,7 @@ restart_as_default() {
 
 is_valid_user() {
 	case ${1:-/} in
-	*[!a-zA-Z0-9_.,]*)
+	*[!0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.,]*)
 		return 1;;
 	esac
 	:
@@ -371,15 +371,21 @@ check_readable() {
 	test -r "$repository_path/$1"
 }
 
-current_date() {
-	current_date=`date +%s` || current_date=
-	case ${current_date:-x} in
-	*[!0-9]*)
-		current_date=0
-		eerror 'Failed to get currrent date'
+is_number() {
+	case ${1:-x} in
+	*[!0123456789]*)
 		return 1;;
 	esac
 	:
+}
+
+current_date() {
+	current_date=`date +%s` || current_date=
+	is_number "$current_date" || {
+		current_date=0
+		eerror 'Failed to get current date'
+		return 1
+	}
 }
 
 # Usage: max_days_file $days $file [$not_exist] [$append_to_not_exist]
@@ -394,10 +400,7 @@ current_date() {
 # in case of early return.
 max_days_file() {
 	max_days_file=
-	case ${1:-x} in
-	*[!0-9]*)
-		return 1;;
-	esac
+	is_number "$1" || return 1
 	[ "$1" -ne 0 ] || return 0
 	max_days_file=0
 	[ -z "${3:++}${4:++}" ] || check_readable "$3${4-}" || {
@@ -410,10 +413,7 @@ max_days_file() {
 		return 1
 	}
 	read max_days_file current_date <"$filestamp_file"
-	case ${max_days_file:-x} in
-	*[!0-9]*)
-		max_days_file=0;;
-	esac
+	is_number "$max_days_file" || max_days_file=0
 	[ $# -ne 3 ] || [ -n "$3" ] || return 0
 	current_date || return 1
 	# 24 * 60 * 60 = 86400 seconds in one day
@@ -430,11 +430,7 @@ max_days_file() {
 # unless a more complete path is specified) unless $days is non_numeric
 # or zero.
 update_days_file() {
-	case ${1:-x} in
-	*[!0-9]*)
-		return 0;;
-	esac
-	[ "$1" -ne 0 ] || return 0
+	is_number "$1" && [ $1 -ne 0 ] || return 0
 	filestamp_file "$2"
 	update_days_file=${filestamp_file%/*}
 	test -d "$update_days_file" || mkdir -p -- "$update_days_file" || {
@@ -473,12 +469,8 @@ git_clone() {
 	fi
 	[ x"$1" != x'--' ] || shift
 	git_clone_depth=${1-}
-	case ${1:-x} in
-	*[!0-9]*)
-		git_clone_depth=;;
-	*)
-		[ "$1" -ne 0 ] || git_clone_depth=;;
-	esac
+	is_number "$git_clone_depth" && [ $git_clone_depth -ne 0 ] \
+		|| git_clone_depth=
 	shift
 	git_clone_remote=$1
 	shift
@@ -540,10 +532,7 @@ git_repack_days() {
 
 postsync_jobs() {
 	[ -n "${POSTSYNC_JOBS:-}" ] || POSTSYNC_JOBS=`nproc` || POSTSYNC_JOBS=
-	case ${POSTSYNC_JOBS:-x} in
-	*[!0-9]*)
-		POSTSYNC_JOBS=;;
-	esac
+	is_number "$POSTSYNC_JOBS" || POSTSYNC_JOBS=
 postsync_job() {
 :
 }
