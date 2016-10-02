@@ -338,7 +338,8 @@ restart_as() {
 	*)
 		restart_as_name=/etc/portage/repo.postsync.d/${0##*/};;
 	esac
-	eval export "restart_as_home=~$restart_as"
+	eval "restart_as_home=~$restart_as"
+	export restart_as_home
 	if [ -z "${POSTSYNC_SHELL:++}" ]
 	then	POSTSYNC_SHELL=`command -v sh 2>/dev/null` && \
 			[ -n "${POSTSYNC_SHELL:++}" ] || \
@@ -347,7 +348,7 @@ restart_as() {
 	exec su -p -s "$POSTSYNC_SHELL" -c 'restart_as_name=$1
 shift
 . "$restart_as_name" "$@"
-' "$restart_as" -- /bin/sh "$restart_as_name" "$@"
+' "$restart_as" -- "$POSTSYNC_SHELL" "$restart_as_name" "$@"
 	die "Failed to exec $restart_as_name as $restart_as"
 }
 
