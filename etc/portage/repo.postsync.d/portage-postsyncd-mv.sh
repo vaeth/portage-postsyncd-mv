@@ -460,42 +460,47 @@ local_path() {
 }
 
 # Usage: git_pull depth local_path [Description]
-# In error case no message is printed, but $local_path is defined
+# eend has to be printed afterwards, possibly using $local_path
 git_pull() {
+	git_pull_depth=$1
 	local_path "$2"
-	if [ -n "${3:++}" ]
-	then	ebeginl "$3"
+	shift 2
+	if [ $# -gt 0 ]
+	then	[ -z "${*:++}" ] || ebeginl "$*"
 	else	ebeginl "Updating $local_path"
 	fi
 	init_vars
-	if ! is_number "${1:-x}" || [ $1 -eq 0 ]
+	if ! is_number "${git_pull_depth:-x}" || [ $git_pull_depth -eq 0 ]
 	then	git -C "$local_path" pull $option_quiet
 		return
 	fi
 	# git pull typically fails in shallow repositories.
 	# Use the same strategy as portage: git fetch && git reset --merge
-	remote_branch=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'` \
+	git_pull_remote=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'` \
 		|| return
-	git -C "$local_path" fetch $option_quiet "--depth=$1" "${remote_branch%%/*}" \
+	git -C "$local_path" fetch $option_quiet "--depth=$git_pull_depth" "${git_pull_remote%%/*}" \
 		|| return
-	git -C "$local_path" reset --merge "$remote_branch" $option_quiet
+	git -C "$local_path" reset --merge "$git_pull_remote" $option_quiet
 }
 
 # Usage: git_new depth remote local_path [Description]
-# In error case no message is printed, but $local_path is defined
+# eend has to be printed afterwards, possibly using $local_path
 git_new() {
+	git_new_depth=$1
+	git_new_remote=$2
 	local_path "$3"
-	if [ -n "${4:++}" ]
-	then	ebeginl "$4"
+	shift 3
+	if [ $# -ge 0 ]
+	then	[ -z "${*:++}" ] || ebeginl "$*"
 	else	ebeginl "Cloning into $local_path"
 	fi
-	git_clone_depth=${1-}
-	is_number "$git_clone_depth" && [ $git_clone_depth -ne 0 ] \
-		|| git_clone_depth=
+	if is_number "$git_new_depth" && [ $git_new_depth -ne 0 ]
+	then	set -- --depth="$git_new_depth"
+	else	set -- a
+		shift
+	fi
 	init_vars
-	git clone $option_quiet \
-		${git_clone_depth:+"--depth=$git_clone_depth"} \
-		-- "$2" "$local_path"
+	git clone $option_quiet ${1+"$@"} -- "$git_new_remote" "$local_path"
 }
 
 # Usage: git_clone [-g] [--] depth remote local_path [Description]
@@ -508,9 +513,14 @@ git_clone() {
 	else	git_clone_repack=:
 	fi
 	[ x"$1" != x'--' ] || shift
+	git_clone_depth=$1
+	git_clone_remote=$2
+	local_path "$3"
+	shift 3
 	if test -d "$local_path/.git"
-	then	git_pull "$1" "$3" "${4-}"
-	else	git_new "$@"
+	then	git_pull "$git_clone_depth" "$local_path" ${1+"$@"}
+	else	git_new "$git_clone_depth" "$git_clone_remote" \
+			"$local_path" ${1+"$@"}
 	fi || eend $? "Try to remove $local_path" \
 		&& $git_clone_repack "$local_path"
 }

@@ -1,5 +1,21 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.3.5:
+	Martin Väth <martin at mvath.de>:
+	- Fix git update failure (regression from 4.3.3)
+
+*portage-postsyncd-mv-4.3.4:
+	Martin Väth <martin at mvath.de>:
+	- Handle export Bourne shell compatible
+
+*portage-postsyncd-mv-4.3.3:
+	Martin Väth <martin at mvath.de>:
+	- Avoid git pull breakage with limited depth
+
+*portage-postsyncd-mv-4.3.2:
+	Martin Väth <martin at mvath.de>:
+	- Avoid LC_COLLATE problems
+
 *portage-postsyncd-mv-4.3.1:
 	Martin Väth <martin at mvath.de>:
 	- eclasses.usage: fix catdir->catfile
