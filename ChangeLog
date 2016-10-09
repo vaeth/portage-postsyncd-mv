@@ -1,5 +1,10 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-4.4.0:
+	Martin Väth <martin at mvath.de>:
+	- Flatten repository's directory structure
+	- eclasses.usage: Handle VERSION workaround correctly
+
 *portage-postsyncd-mv-4.3.5:
 	Martin Väth <martin at mvath.de>:
 	- Fix git update failure (regression from 4.3.3)

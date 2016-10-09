@@ -25,37 +25,41 @@ When you do not sync from git, a lot of tasks will be skipped, automatically.
 Installation:
 
 Emerge the app-portage/portage-postsyncd-mv ebuild from the mv overlay.
-Alternatively, copy all files from the subdirectories to their corresponding
-location in the main file system (usr/share/zsh/site-functions can mean any
-directory from your zsh's $fpath)
+Alternatively, copy the content of repo.postsync.d/ to
+/etc/portage/repo.postsync.d/, the content of bin/ to your $PATH
+(perhaps /usr/bin). For zsh completion support, copy the content of zsh/
+to your zsh's $fpath (perhaps /usr/share/zsh/site-functions).
+To get the hack for q-reinit mentioned below, also copy the file
+app-portage/portage-utils into /etc/portage/env/app-portage/
+(creating this directory and its parents if it does not exist yet).
 
 Configuration:
 
 There are sane defaults, but if you need a nonstandard setting,
 you can configure a lot of details through POSTSYNC_* variables
-in your /etc/portage/make.conf. Read etc/portage/repo.postsync.d/README
+in your /etc/portage/make.conf. Read repo.postsync.d/README
 for the available variables and their default values.
 
 If you use app-portage/portage-utils, it is recommended to call
 
 	chmod a-x /etc/portage/repo.postsync.d/q-reinit
 
-(The file etc/portage/env/app-portage/portage-utils, when copied to the main
-tree, is a hack which will make this happen automatically at any future emerge
-of app-portage/portage-utils)
+(The file app-portage/portage-utils - when copied to
+/etc/portage/env/app-portage/ - is a hack which will make this
+happen automatically at any future emerge of app-portage/portage-utils)
 In this way, the script /etc/portage/repo.postsync.d/q-reinit will be executed
 at a more appropriate time of syncing and with more explicit output by
-etc/portage/repo.postsync.d/??-q-reinit
+/etc/portage/repo.postsync.d/??-q-reinit
 However, the latter script is careful to not do anything if you have
-not executed the command - so nothing really bad will happen
+not executed the above command - so nothing really bad will happen
 if you do not follow the above recommendation.
 
 Of course, it is also possible to switch off the executable bits of some
-files of this project in etc/portage/repo.postsync.d/*
+files of this project in /etc/portage/repo.postsync.d/*
 Then, of course, the corresponding functionality will be switched off.
 The project is written in such a way that this is not harmful.
 
-Except for setting permissions of your repositories,
+Except for setting permissions of your repositories and
 calling egencache for your non-main repositories
 (and q-reinit for all repositories), the scripts do nothing
 unless you configure your main repository to be fetched via git.
@@ -93,9 +97,9 @@ Specify sync-depth = 1 if you are not interested in any ChangeLogs:
 This will need half of the disk space (or even less in some future).
 
 However, the scripts in this project will also regularly recompress your
-git history (with git-repack and related commands) so that it needs less disk
-space. The latter takes some time, of course. As mentioned above, read
-etc/portage/repo.postsync.d/README to learn how to configure such details.
+git history (with git repack) so that it needs less disk space.
+The latter takes some time, of course. As mentioned above, read
+repo.postsync.d/README to learn how to configure such details.
 
 These scripts make use of some timestamps.
 These are stored locally in the $location/local/timestamps directory

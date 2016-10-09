@@ -1,7 +1,10 @@
 #!/usr/bin/env perl
 BEGIN { require 5.006_001 }
-our $VERSION = 'v4.3.1';
-eval "package Eclasses $VERSION" if($] ge '5.012');
+package Eclasses;
+our $VERSION = 'v4.4.0';
+eval { $VERSION = version->declare($VERSION) };
+eval 'use version 0.77; $VERSION = version->declare($VERSION)' if($@);
+
 use warnings;
 use strict;
 use integer;
