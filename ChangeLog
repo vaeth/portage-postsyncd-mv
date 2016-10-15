@@ -1,5 +1,10 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.0.1:
+	Martin Väth <martin at mvath.de>:
+	- Use git reset --merge again, but preceed by git status:
+	  See https://bugs.gentoo.org/show_bug.cgi?id=552814
+
 *portage-postsyncd-mv-5.0.0:
 	Martin Väth <martin at mvath.de>:
 	- Never attempt git merging; use always git reset --hard

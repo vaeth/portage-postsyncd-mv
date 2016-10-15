@@ -504,15 +504,19 @@ git_pull() {
 		|| git_pull_depth=
 	git_pull_remote=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'` \
 		|| return
+	# Use the same strategy as portage: git fetch && git reset --merge
+	# We need to call git status first to make e.g. git+overlayfs happy,
+	# see https://bugs.gentoo.org/show_bug.cgi?id=552814
+	git_pull_status_state=0
+	git -C "$local_path" status >/dev/null 2>&1 || git_pull_status_state=$?
 	git -C "$local_path" fetch $option_quiet \
 		${git_pull_depth:+--depth=$git_pull_depth} \
 		"${git_pull_remote%%/*}" \
 		|| return
-	git_pull_head=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name 'HEAD'` \
-		|| return
-	git -C "$local_path" reset --hard "$git_pull_remote" $option_quiet
+	git -C "$local_path" reset --merge "$git_pull_remote" $option_quiet
 	git_pull_merge_state=$?
-	return $git_pull_merge_state
+	[ $git_pull_merge_state -eq 0 ] || return $git_pull_merge_state
+	return $git_pull_status_state
 }
 
 # Usage: git_new depth remote local_path [Description]
