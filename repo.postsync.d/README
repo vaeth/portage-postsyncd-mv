@@ -187,6 +187,13 @@
 # The URL of the glsa git repository
 # POSTSYNC_URL_NEWS="https://anongit.gentoo.org/git/data/gentoo-news.git"
 
+# How often removing metadata/news and retrying git in case of failure
+# POSTSYNC_RETRY_NEWS="1"
+
+# Whether to keep partial metadata/news if all retries failed.
+# Can be "yes", "no", or "never". The latter means removal even if fetch failed
+# POSTSYNC_KEEP_NEWS="no"
+
 # The minimal number of days before syncing glsa again
 # (0 means never, and non-numerical values mean every time)
 # POSTSYNC_DAYS_GLSA="2"
@@ -197,6 +204,13 @@
 # The URL of the glsa git repository
 # POSTSYNC_URL_GLSA="https://anongit.gentoo.org/git/data/glsa.git"
 
+# How often removing metadata/glsa and retrying git in case of failure
+# POSTSYNC_RETRY_GLSA="1"
+
+# Whether to keep partial metadata/glsa if all retries failed
+# Can be "yes", "no", or "never". The latter means removal even if fetch failed
+# POSTSYNC_KEEP_GLSA="no"
+
 # The minimal number of days before syncing xml-schema again
 # (0 means never, and non-numerical values mean every time)
 # POSTSYNC_DAYS_XML_SCHEMA="30"
@@ -205,8 +219,15 @@
 # (0 or non-numeric is unlimited)
 # POSTSYNC_DEPTH_XML_SCHEMA="1"
 
-# The URL of the xml-cschme git repository
+# The URL of the xml-schema git repository
 # POSTSYNC_URL_XML_SCHEMA="https://anongit.gentoo.org/git/data/xml-schema.git"
+
+# How often removing metadata/xml-schema and retrying git in case of failure
+# POSTSYNC_RETRY_XML_SCHEMA="1"
+
+# Whether to keep partial metadata/xml-schema if all retries failed
+# Can be "yes", "no", or "never". The latter means removal even if fetch failed
+# POSTSYNC_KEEP_XML_SCHEMA="no"
 
 # The minimal number of days before syncing dtd again
 # (0 means never, and non-numerical values mean every time)
@@ -217,6 +238,13 @@
 
 # The URL of the dtd git repository
 # POSTSYNC_URL_DTD="https://anongit.gentoo.org/git/data/dtd.git"
+
+# How often removing metadata/dtd and retrying git in case of failure
+# POSTSYNC_RETRY_DTD="1"
+
+# Whether to keep partial metadata/dtd if all retries failed
+# Can be "yes", "no", or "never". The latter means removal even if fetch failed
+# POSTSYNC_KEEP_DTD="no"
 
 # The minimal number of days before syncing projects.xml again
 # (0 means never, and non-numerical values mean every time)

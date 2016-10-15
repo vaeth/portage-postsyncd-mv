@@ -8,6 +8,8 @@ restart_as_default "$@"
 
 set -- "${POSTSYNC_DAYS_GLSA:-2}" glsa.date metadata/glsa /.git
 ! max_days_file "$@" || exit 0
-git_clone -g "${POSTSYNC_DEPTH_GLSA:-1}" \
+normalize_gitkeep POSTSYNC_KEEP_GLSA
+git_clone -g $POSTSYNC_KEEP_GLSA -r "${POSTSYNC_RETRY_GLSA:-1}" -- \
+	"${POSTSYNC_DEPTH_GLSA:-1}" \
 	"${POSTSYNC_URL_GLSA:-https://anongit.gentoo.org/git/data/glsa.git}" \
 	"$3" 'Updating GLSAs' && update_days_file "$@"

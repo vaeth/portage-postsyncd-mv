@@ -286,6 +286,34 @@ yesno() {
 	:
 }
 
+# normalizeyesno VAR [yes [no [pattern [value] ...]]]
+# yes defaults to :, no to empty string, pattern is evaluated within case
+normalizeyesno() {
+	normalizeyesno_v=$1
+	shift
+	normalizeyesno_y=${1-:}
+	[ $# -le 0 ] || shift
+	normalizeyesno_n=${1-}
+	[ $# -le 0 ] || shift
+	while [ $# -gt 0 ]
+	do	eval 'case ${'$normalizeyesno_v'-} in
+		'$1')
+			[ $# -lt 2 ] || '$normalizeyesno_v'=$2
+			return;;
+		esac'
+		shift
+		[ $# -le 0 ] || shift
+	done
+	if eval 'yesno "${'$normalizeyesno_v'-}"'
+	then	eval $normalizeyesno_v=\$normalizeyesno_y
+	else	eval $normalizeyesno_v=\$normalizeyesno_n
+	fi
+}
+
+normalize_gitkeep() {
+	normalizeyesno $1 -k '' '[nN][eE][vV]*' -K
+}
+
 restart_as_default() {
 	[ -n "${POSTSYNC_REPO_USER++}" ] || POSTSYNC_REPO_USER='** portage'
 	restart_as_default=
@@ -461,7 +489,9 @@ local_path() {
 
 # Usage: git_pull depth local_path [Description]
 # eend has to be printed afterwards, possibly using $local_path
+# git_pull_merge_state indicates in error case whether the merge failed
 git_pull() {
+	git_pull_merge_state=0
 	git_pull_depth=$1
 	local_path "$2"
 	shift 2
@@ -470,17 +500,19 @@ git_pull() {
 	else	ebeginl "Updating $local_path"
 	fi
 	init_vars
-	if ! is_number "${git_pull_depth:-x}" || [ $git_pull_depth -eq 0 ]
-	then	git -C "$local_path" pull $option_quiet
-		return
-	fi
-	# git pull typically fails in shallow repositories.
-	# Use the same strategy as portage: git fetch && git reset --merge
+	is_number "${git_pull_depth:-x}" && [ $git_pull_depth -gt 0 ] \
+		|| git_pull_depth=
 	git_pull_remote=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'` \
 		|| return
-	git -C "$local_path" fetch $option_quiet "--depth=$git_pull_depth" "${git_pull_remote%%/*}" \
+	git -C "$local_path" fetch $option_quiet \
+		${git_pull_depth:+--depth=$git_pull_depth} \
+		"${git_pull_remote%%/*}" \
 		|| return
-	git -C "$local_path" reset --merge "$git_pull_remote" $option_quiet
+	git_pull_head=`git -C "$local_path" rev-parse --abbrev-ref --symbolic-full-name 'HEAD'` \
+		|| return
+	git -C "$local_path" reset --hard "$git_pull_remote" $option_quiet
+	git_pull_merge_state=$?
+	return $git_pull_merge_state
 }
 
 # Usage: git_new depth remote local_path [Description]
@@ -503,26 +535,62 @@ git_new() {
 	git clone $option_quiet ${1+"$@"} -- "$git_new_remote" "$local_path"
 }
 
-# Usage: git_clone [-g] [--] depth remote local_path [Description]
-# depth 0 or non-numerical means that no --depth argument is passed
-# With option -g, apply git_repack afterwards.
+# Usage: git_clone [option] [--] depth remote local_path [Description]
+# depth 0 or non-numerical means that no --depth argument is passed. Options:
+# -g     apply git_repack afterwards.
+# -r NUM remove $local_path and retry NUM times in error case (default is 1)
+# -k     keep partial $local_path after all retries
+# -K     remove partial $local_path after all retries even if only fetch failed
 git_clone() {
-	if [ x"$1" = x'-g' ]
-	then	shift
-		git_clone_repack=git_repack
-	else	git_clone_repack=:
-	fi
-	[ x"$1" != x'--' ] || shift
+	git_clone_repack=:
+	git_clone_retry=1
+	git_clone_keep=
+	OPTIND=1
+	while getopts 'gkKr:' git_clone_opt
+	do	case $git_clone_opt in
+		g)	git_clone_repack=git_repack;;
+		k)	git_clone_keep=:;;
+		K)	git_clone_keep=false;;
+		r)	git_clone_retry=$OPTARG
+			is_number "$git_clone_retry" || \
+				die "git_clone -r: arg not a number: ${git_clone_retry:-(empty string)}";;
+		'?')	die 'git_clone: illegal option';;
+		esac
+	done
+	shift $(( $OPTIND - 1 ))
 	git_clone_depth=$1
 	git_clone_remote=$2
 	local_path "$3"
 	shift 3
-	if test -d "$local_path/.git"
-	then	git_pull "$git_clone_depth" "$local_path" ${1+"$@"}
-	else	git_new "$git_clone_depth" "$git_clone_remote" \
-			"$local_path" ${1+"$@"}
-	fi || eend $? "Try to remove $local_path" \
-		&& $git_clone_repack "$local_path"
+	while :
+	do	if test -d "$local_path/.git"
+		then	git_pull "$git_clone_depth" "$local_path" ${1+"$@"}
+		else	git_pull_merge_state=0
+			git_new "$git_clone_depth" "$git_clone_remote" \
+				"$local_path" ${1+"$@"}
+		fi
+		git_clone_state=$?
+		[ $git_clone_state -ne 0 ] || break
+		if [ $git_clone_retry -le 0 ]
+		then	[ -n "$git_clone_keep" ] || \
+				[ $git_pull_merge_state -eq 0 ] || \
+					git_clone_keep=:
+			if ${git_clone_keep:-false}
+			then	eend $git_clone_state "you might try to remove $local_path and retry later"
+			else	eend $git_clone_state "removing $local_path"
+				rm -rf -- "$local_path"
+				eend $?
+			fi
+			return $git_clone_state
+		fi
+		eend $git_clone_state "Removing $local_path and retrying"
+		rm -rf -- "$local_path" || {
+			eend $? 'not retrying due to removal failure'
+			return
+		}
+		git_clone_retry=$(( $git_clone_retry - 1 ))
+	done
+	$git_clone_repack "$local_path"
 }
 
 # Usage: git_repack dir [message]

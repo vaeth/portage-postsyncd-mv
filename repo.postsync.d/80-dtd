@@ -8,6 +8,8 @@ restart_as_default "$@"
 
 set -- "${POSTSYNC_DAYS_DTD:-30}" dtd.date metadata/dtd /.git
 ! max_days_file "$@" || exit 0
-git_clone -g "${POSTSYNC_DEPTH_DTD:-1}" \
+normalize_gitkeep POSTSYNC_KEEP_DTD
+git_clone -g $POSTSYNC_KEEP_DTD -r "${POSTSYNC_RETRY_DTD:-1}" -- \
+	"${POSTSYNC_DEPTH_DTD:-1}" \
 	"${POSTSYNC_URL_DTD:-https://anongit.gentoo.org/git/data/dtd.git}" \
 	"$3" 'Updating DTDs' && update_days_file "$@"

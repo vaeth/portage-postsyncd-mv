@@ -8,6 +8,8 @@ restart_as_default "$@"
 
 set -- "${POSTSYNC_DAYS_NEWS:-1}" news.date metadata/news /.git
 ! max_days_file "$@" || exit 0
-git_clone -g "${POSTSYNC_DEPTH_NEWS:-1}" \
+normalize_gitkeep POSTSYNC_KEEP_NEWS
+git_clone -g $POSTSYNC_KEEP_NEWS -r "${POSTSYNC_RETRY_NEWS:-1}" -- \
+	"${POSTSYNC_DEPTH_NEWS:-1}" \
 	"${POSTSYNC_URL_NEWS:-https://anongit.gentoo.org/git/data/gentoo-news.git}" \
 	"$3" 'Updating news' && update_days_file "$@"

@@ -1,5 +1,11 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.0.0:
+	Martin Väth <martin at mvath.de>:
+	- Never attempt git merging; use always git reset --hard
+	- Introduce *_RETRY_* and *_KEEP_* for git error handling and
+	  support for automatic directory removal
+
 *portage-postsyncd-mv-4.4.0:
 	Martin Väth <martin at mvath.de>:
 	- Flatten repository's directory structure

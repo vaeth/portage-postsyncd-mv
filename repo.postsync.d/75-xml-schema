@@ -9,6 +9,8 @@ restart_as_default "$@"
 set -- "${POSTSYNC_DAYS_XML_SCHEMA:-30}" xml-schema.date \
 	metadata/xml-schema /.git
 ! max_days_file "$@" || exit 0
-git_clone -g "${POSTSYNC_DEPTH_XML_SCHEMA:-1}" \
+normalize_gitkeep POSTSYNC_KEEP_XML_SCHEMA
+git_clone -g $POSTSYNC_KEEP_XML_SCHEMA -r "${POSTSYNC_RETRY_XML_SCHEMA:-1}" -- \
+	"${POSTSYNC_DEPTH_XML_SCHEMA:-1}" \
 	"${POSTSYNC_URL_XML_SCHEMA:-https://anongit.gentoo.org/git/data/xml-schema.git}" \
 	"$3" 'Updating xml-schema' && update_days_file "$@"
