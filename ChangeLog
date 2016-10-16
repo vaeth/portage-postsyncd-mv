@@ -1,9 +1,15 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.0.2:
+	Martin Väth <martin at mvath.de>:
+	- Replace "git status" by "git udpate-index --refresh -q --unmerged"
+	  which is the for us important part which "git status" does internally
+	  https://bugs.gentoo.org/show_bug.cgi?id=552814#c43
+
 *portage-postsyncd-mv-5.0.1:
 	Martin Väth <martin at mvath.de>:
 	- Use git reset --merge again, but preceed by git status:
-	  See https://bugs.gentoo.org/show_bug.cgi?id=552814
+	  See https://bugs.gentoo.org/show_bug.cgi?id=552814#c38
 
 *portage-postsyncd-mv-5.0.0:
 	Martin Väth <martin at mvath.de>:
