@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.1.0:
+	Martin Väth <martin at mvath.de>:
+	- Skip cache fetching with rsync based on checksum
+
 *portage-postsyncd-mv-5.0.2:
 	Martin Väth <martin at mvath.de>:
 	- Replace "git status" by "git udpate-index --refresh -q --unmerged"

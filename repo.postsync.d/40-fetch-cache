@@ -20,7 +20,7 @@ fetch_cache() {
 	postsync_sync
 	ebeginl "Fetching pre-generated metadata for the $repository_name repository"
 	fetch_cache=/metadata/md5-cache
-	rsync_a "$POSTSYNC_SYNC$fetch_cache" "$repository_path$fetch_cache"
+	rsync_a -c "$POSTSYNC_SYNC$fetch_cache" "$repository_path$fetch_cache"
 	eend $?
 }
 
