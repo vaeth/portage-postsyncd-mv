@@ -80,6 +80,13 @@
 # If SYNC is empty or unset, the default is
 # POSTSYNC_SYNC="rsync://rsync.gentoo.org/gentoo-portage"
 
+# Extra options to be used when fetching metadata via rsync.
+# If unspecified, the option -c is used: This option is useful when a lot of
+# metadata is calculated locally, because the timestamps then usually differ,
+# although it is usually not necessary to download these files.
+# POSTSYNC_RSYNC_EXTRA_OPTS="-c"
+# POSTSYNC_RSYNC_EXTRA_OPTS=""
+
 # The minimal number of days between two fetchings of pre-calculated metadata
 # (0 means never, and non-numerical values mean every time).
 # Do not set it to a non-numerical value to avoid violating the gentoo policy

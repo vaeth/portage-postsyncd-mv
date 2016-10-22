@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.1.1:
+	Martin Väth <martin at mvath.de>:
+	- Introduce POSTSYNC_RSYNC_EXTRA_OPTS and let it default to -c
+
 *portage-postsyncd-mv-5.1.0:
 	Martin Väth <martin at mvath.de>:
 	- Skip cache fetching with rsync based on checksum

@@ -721,7 +721,7 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 rsync_a() {
 	init_vars
 	rsync -ltDHS --modify-window=1 -r --delete $option_quiet \
-		${option_verbose:---progress} ${option_verbose:--vi} -- "$@"
+		${option_verbose:---progress} ${option_verbose:--vi} "$@"
 }
 
 postsync_sync() {
