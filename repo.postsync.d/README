@@ -87,6 +87,9 @@
 # POSTSYNC_RSYNC_EXTRA_OPTS="-c"
 # POSTSYNC_RSYNC_EXTRA_OPTS=""
 
+# Timeout for rsync in seconds
+# POSTSYNC_RSYNC_TIMEOUT="20"
+
 # The minimal number of days between two fetchings of pre-calculated metadata
 # (0 means never, and non-numerical values mean every time).
 # Do not set it to a non-numerical value to avoid violating the gentoo policy

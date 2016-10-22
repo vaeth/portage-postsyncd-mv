@@ -718,10 +718,21 @@ $POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
 	$egencache_options_end
 }
 
+rsync_timeout() {
+	: ${POSTSYNC_RSYNC_TIMEOUT=20}
+	is_number "${POSTSYNC_RSYNC_TIMEOUT}" || POSTSYNC_RSYNC_TIMEOUT=
+	rsync_timeout() {
+	:
+}
+}
+
 rsync_a() {
 	init_vars
-	rsync -ltDHS --modify-window=1 -r --delete $option_quiet \
-		${option_verbose:---progress} ${option_verbose:--vi} "$@"
+	rsync_timeout
+	rsync -ltDHS --modify-window=2 -r --delete $option_quiet \
+		${option_verbose:---progress} ${option_verbose:--vi} \
+		${POSTSYNC_RSYNC_TIMEOUT:+--timeout=$POSTSYNC_RSYNC_TIMEOUT} \
+		"$@"
 }
 
 postsync_sync() {

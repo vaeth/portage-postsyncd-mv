@@ -1,5 +1,10 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-5.2.0:
+	Martin Väth <martin at mvath.de>:
+	- Introduce POSTSYNC_RSYNC_TIMEOUT and let it default to 20
+	- Use modify-window=2 to deal with FAT filesystems
+
 *portage-postsyncd-mv-5.1.1:
 	Martin Väth <martin at mvath.de>:
 	- Introduce POSTSYNC_RSYNC_EXTRA_OPTS and let it default to -c
