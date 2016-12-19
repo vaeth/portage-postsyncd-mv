@@ -4,7 +4,7 @@ only_main=
 . ${POSTSYNC_FUNCTIONS:-"${PORTAGE_CONFIGROOT-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
 
-[ -n "${POSTSYNC_CHPERM++}" ] || POSTSYNC_CHPERM='** - - portage portage'
+[ -n "${POSTSYNC_CHPERM++}" ] || POSTSYNC_CHPERM='** 3775 - portage portage'
 
 chperm_dir=
 chperm_file=
@@ -42,14 +42,8 @@ do	case $chperm_mode in
 	esac
 done
 $chperm_end
-case $chperm_dir in
-*[!0-7]*)
-	chperm_dir=;;
-	esac
-case $chperm_file in
-[!0-7]*)
-	chperm_file=;;
-esac
+is_octal "$chperm_dir" || chperm_dir=
+is_octal "$chperm_file" || chperm_file=
 is_valid_user "$chperm_user" || chperm_user=
 is_valid_user "$chperm_group" || chperm_group=
 

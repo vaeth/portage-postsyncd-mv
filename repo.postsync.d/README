@@ -39,7 +39,7 @@
 # are set correspodingly, respectively, if they differ.
 # Analogously for user or group (which can be names or ids); an invalid
 # user/group (e.g. "-") means that user/group is not modified.
-# POSTSYNC_CHPERM="** - - portage portage"
+# POSTSYNC_CHPERM="** 3775 - portage portage"
 
 # The permissions which should be used to access the repositories.
 # As soon as possible, permissions are dropped to the corresponding user.

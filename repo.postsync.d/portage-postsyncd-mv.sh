@@ -408,6 +408,14 @@ is_number() {
 	:
 }
 
+is_octal() {
+	case ${1:-x} in
+	*[!01234567]*)
+		return 1;;
+	esac
+	:
+}
+
 current_date() {
 	current_date=`date +%s` || current_date=
 	is_number "$current_date" || {
