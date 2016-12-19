@@ -53,29 +53,30 @@ ebeginv "Setting permissions ${chperm_dir:--}/${chperm_file:--} ${chperm_user:--
 init_vars
 set -- find "$repository_path"
 chperm_or=
+chperm_or_set='-name a -name b -o'
 if [ -n "$chperm_dir" ]
 then	set -- ${1+"$@"} \
 	-type d '!' -perm "$chperm_dir" '!' -type l \
 	-exec chmod $option_verbose -- "$chperm_dir" '{}' '+'
-	chperm_or=-o
+	chperm_or=$chperm_or_set
 fi
 if [ -n "$chperm_file" ]
 then	set -- ${1+"$@"} $chperm_or \
 	-type f '!' -perm "$chperm_file" '!' -type l \
 	-exec chmod $option_verbose -- "$chperm_file" '{}' '+'
-	chperm_or=-o
+	chperm_or=$chperm_or_set
 fi
 if [ -n "$chperm_user" ]
 then	set -- ${1+"$@"} $chperm_or \
 	'!' -user "$chperm_user" \
 	-exec chown -h $option_verbose -- "$chperm_user" '{}' '+'
-	chperm_or=-o
+	chperm_or=$chperm_or_set
 fi
 if [ -n "$chperm_group" ]
 then	set -- ${1+"$@"} $chperm_or \
 	'!' -group "$chperm_group" \
 	-exec chgrp -h $option_verbose -- "$chperm_group" '{}' '+'
-	chperm_or=-o
+	chperm_or=$chperm_or_set
 fi
 "$@"
 eend $?
