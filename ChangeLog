@@ -1,5 +1,11 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-6.0.0:
+	Martin Väth <martin at mvath.de>:
+	- Re-enumerate services
+	- Set permissions also at the end
+	- No default write permissions. Change default file permissions
+
 *portage-postsyncd-mv-5.3.0:
 	Martin Väth <martin at mvath.de>:
 	- Fix simultaneous setting of several permissions
