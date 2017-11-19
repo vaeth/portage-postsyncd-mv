@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-6.0.1:
+	Martin Väth <martin at mvath.de>:
+	- Treat 0 and - as false only if no symbol follows
+
 *portage-postsyncd-mv-6.0.0:
 	Martin Väth <martin at mvath.de>:
 	- Re-enumerate services
