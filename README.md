@@ -44,8 +44,9 @@ in your `/etc/portage/make.conf`. Read `repo.postsync.d/README`
 for the available variables and their default values.
 
 If you use `app-portage/portage-utils`, it is recommended to call
-
-	`chmod a-x /etc/portage/repo.postsync.d/q-reinit`
+```
+chmod a-x /etc/portage/repo.postsync.d/q-reinit
+```
 
 (The file `app-portage/portage-utils` - when copied to
 `/etc/portage/env/app-portage/` - is a hack which will make this
@@ -57,7 +58,7 @@ However, the latter script is careful to not do anything if you have
 not executed the above command - so nothing really bad will happen
 if you do not follow the above recommendation.
 
-Of course, it is also possible to switch off the executable bits of some
+Of course, it is also possible to remove the executable bits of some
 files of this project in `/etc/portage/repo.postsync.d/*`.
 Then, of course, the corresponding functionality will be switched off.
 The project is written in such a way that this is not harmful.
@@ -106,6 +107,6 @@ The latter takes some time, of course. As mentioned above, read
 `repo.postsync.d/README` to learn how to configure such details.
 
 These scripts make use of some timestamps.
-These are stored locally in the _$location_`/local/timestamps` directory
-(which is created if it does not exist). Here, _$location_ is the path to
+These are stored locally in the `$location/local/timestamps` directory
+(which is created if it does not exist). Here, `$location` is the path to
 the (main) repository.
