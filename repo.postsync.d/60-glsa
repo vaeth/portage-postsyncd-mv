@@ -3,6 +3,7 @@ set -u
 only_main=+
 . ${POSTSYNC_FUNCTIONS:-"${PORTAGE_CONFIGROOT-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
+exit_if_mirror
 is_git || exit 0
 restart_as_default "$@"
 

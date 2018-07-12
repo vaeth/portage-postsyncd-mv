@@ -1,5 +1,10 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-7.0:
+	Martin Väth <martin at mvath.de>:
+	- Support gentoo-mirror via variable POSTSYNC_MIRROR
+	- Change default: POSTSYNC_EGENCACHE=""
+
 *portage-postsyncd-mv-6.0.1:
 	Martin Väth <martin at mvath.de>:
 	- Treat 0 and - as false only if no symbol follows

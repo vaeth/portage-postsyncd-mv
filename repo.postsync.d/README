@@ -63,6 +63,14 @@
 # The name of the main repository:
 # POSTSYNC_MAIN_REPOSITORY="gentoo"
 
+# The following variable is crucial for all of the rest:
+# If it is "yes", it is assumed that a mirror site likegentoo-mirror is used
+# for git syncing of the POSTSYNC_MAIN_REPOSITORY.
+# This means that no additional data has to be fetched, and by default
+# egencache should not regenerate metadata for POSTSYNC_MAIN_REPOSITORY
+# except for profiles/use.local.desc
+# POSTSYNC_MIRROR=""
+
 # The name of the mirror from which the pre-generated cache is synced.
 # Depending on your continent, the following choices might be reasonable:
 # North America:
@@ -107,7 +115,7 @@
 # probability that this might be necessary anyway, since the precalculated data
 # is often behind a recent eclass change (forcing a recalculation which might
 # not yet have finished and reached the mirrors).
-# POSTSYNC_DAYS_FETCH_CACHE="2"
+# POSTSYNC_DAYS_FETCH_CACHE="2" # "0" if POSTSYNC_MIRROR is set
 
 # The minimal number of days between last metadata update/calculation
 # and fetching of the pre-generated metadata cache for the main repository
@@ -179,11 +187,14 @@
 # POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} mv --changelog-reversed"
 # POSTSYNC_EGENCACHE="${POSTSYNC_EGENCACHE} mv --update-changelogs"
 # The default is:
-# POSTSYNC_EGENCACHE="mv --changelog-reversed mv --update-changelogs"
+# POSTSYNC_EGENCACHE=""
 
 # This is prepended to POSTSYNC_EGENCACHE.
 # Do not set it unless you want to _remove_ the defaults for some reason.
-# Very likely you want to include at least "** --update" in this variable.
+# Very likely you want to include at least "** --update" (or "* --update" if
+# POSTSYNC_MIRROR is "yes").
+# If POSTSYNC_MIRROR is "yes" the substring "** --update" is changed to "* --update"
+# in the following default:
 # POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
 # ${POSTSYNC_MAIN_REPOSITORY} --update-use-local-desc"
 

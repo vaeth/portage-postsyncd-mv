@@ -341,6 +341,10 @@ restart_as_default() {
 	restart_as "${restart_as_default:-root}" "$@"
 }
 
+exit_if_mirror() {
+	! yesno "${POSTSYNC_MIRROR-}" || exit 0
+}
+
 is_valid_user() {
 	case ${1:-/} in
 	*[!0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.,]*)
@@ -690,7 +694,7 @@ postsync_skip() {
 }
 
 call_egencache() {
-	ebegin "Updating metadata cache for the $repository_name repository"
+	ebegin "Calling egencache for the $repository_name repository"
 	postsync_jobs
 	unset EGENCACHE_DEFAULT_OPTS
 	egencache ${POSTSYNC_JOBS:+"--jobs=$POSTSYNC_JOBS"} \
@@ -699,11 +703,14 @@ call_egencache() {
 }
 
 egencache_options() {
-	[ -n "${POSTSYNC_EGENCACHE_DEFAULT++}" ] || \
-		POSTSYNC_EGENCACHE_DEFAULT="** --ignore-default-opts ** --update ** --tolerant
-$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
-	[ -n "${POSTSYNC_EGENCACHE++}" ] || \
-		POSTSYNC_EGENCACHE='mv --changelog-reversed mv --update-changelogs'
+	if [ -z "${POSTSYNC_EGENCACHE_DEFAULT++}" ]
+	then	POSTSYNC_EGENCACHE_DEFAULT='** --ignore-default-opts *'
+		yesno "${POSTSYNC_MIRROR-}" || \
+			POSTSYNC_EGENCACHE_DEFAULT=$POSTSYNC_EGENCACHE_DEFAULT'*'
+		POSTSYNC_EGENCACHE_DEFAULT=$POSTSYNC_EGENCACHE_DEFAULT' --update ** --tolerant
+'"$POSTSYNC_MAIN_REPOSITORY --update-use-local-desc"
+	fi
+	: ${POSTSYNC_EGENCACHE:=}
 	egencache_options=
 	egencache_options_repo=:
 	case $- in

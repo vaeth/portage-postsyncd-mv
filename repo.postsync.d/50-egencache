@@ -6,7 +6,8 @@ only_main=
 ! postsync_skip || exit 0
 restart_as_default "$@"
 
-[ x"$repository_name" != x"$POSTSYNC_MAIN_REPOSITORY" ] || if is_git
+[ x"$repository_name" != x"$POSTSYNC_MAIN_REPOSITORY" ] || \
+	yesno "${POSTSYNC_MIRROR-}" || if is_git
 then	update_days_file 1 metadata/timestamp.x
 else	exit 0
 fi
