@@ -612,15 +612,37 @@ git_clone() {
 	$git_clone_repack "$local_path"
 }
 
-# Usage: git_repack dir [message]
+# $git_repack must be true or false and $local_path must be set.
+git_repack_exec() {
+	if ! $git_repack
+	then	git -C "$local_path" repack -a -d
+		return
+	fi
+	git_gc_prune=0
+	git -C "$local_path" prune || git_gc_prune=$?
+	git -C "$local_path" repack -a -d || git_gc_prune=$?
+	git -C "$local_path" reflog expire --expire=now --all || git_gc_prune=$?
+	git -C "$local_path" gc '--prune=all' --aggressive || git_gc_prune=$?
+	git -C "$local_path" repack -a -d || git_gc_prune=$?
+	git -C "$local_path" prune || git_gc_prune=$?
+	return $git_gc_prune
+}
+
+# Usage: git_repack dir [force gc/prune]
 git_repack() {
+	init_vars
 	local_path "$1"
 	if [ -n "${2:++}" ]
-	then	ebeginl "$2"
-	else	ebeginl "Calling git-repack for $local_path"
+	then	git_repack=$2
+	elif repo_in_list '${POSTSYNC_GIT_GC_PRUNE-**}'
+	then	git_repack=:
+	else	git_repack=false
 	fi
-	init_vars
-	eval git -C \"\$local_path\" repack -a -d ${option_quiet:+>/dev/null}
+	if $git_repack
+	then	ebeginl "Calling git prune/gc/repack for the $repository_name repository"
+	else	ebeginl "Calling git repack for the $repository_name repository"
+	fi
+	eval git_repack_exec ${option_quiet:+>/dev/null}
 	eend $?
 }
 
@@ -686,10 +708,23 @@ check_writable() {
 	exit 1
 }
 
-postsync_skip() {
-	for postsync_skip in ${POSTSYNC_SKIP-}
-	do	! is_repository "$postsync_skip" || return 0
+repo_in_list() {
+	case $- in
+	*f*)
+		repo_in_list_end=:;;
+	*)
+		set -f
+		repo_in_list_end='set +f';;
+	esac
+	eval "set -- a $1"
+	shift
+	for repo_in_list
+	do	if is_repository "$repo_in_list"
+		then	$repo_in_list_end
+			return 0
+		fi
 	done
+	$repo_in_list_end
 	return 1
 }
 

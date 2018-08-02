@@ -3,7 +3,7 @@ set -u
 only_main=
 . ${POSTSYNC_FUNCTIONS:-"${PORTAGE_CONFIGROOT-}"/etc/portage/repo.postsync.d/portage-postsyncd-mv.sh} \
 	${1+"$@"}
-! postsync_skip || exit 0
+! repo_in_list '${POSTSYNC_SKIP-}' || exit 0
 restart_as_default "$@"
 
 [ x"$repository_name" != x"$POSTSYNC_MAIN_REPOSITORY" ] || \

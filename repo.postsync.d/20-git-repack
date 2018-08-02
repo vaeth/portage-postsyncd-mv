@@ -8,5 +8,4 @@ restart_as_default "$@"
 
 set -- "${POSTSYNC_DAYS_GIT_REPACK:-7}" git-repack.date
 ! max_days_file "$@" || exit 0
-git_repack . "Calling git-repack for the $repository_name repository" \
-	&& update_days_file "$@"
+git_repack . && update_days_file "$@"

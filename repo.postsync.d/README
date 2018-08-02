@@ -64,7 +64,7 @@
 # POSTSYNC_MAIN_REPOSITORY="gentoo"
 
 # The following variable is crucial for all of the rest:
-# If it is "yes", it is assumed that a mirror site likegentoo-mirror is used
+# If it is "yes", it is assumed that a mirror site like gentoo-mirror is used
 # for git syncing of the POSTSYNC_MAIN_REPOSITORY.
 # This means that no additional data has to be fetched, and by default
 # egencache should not regenerate metadata for POSTSYNC_MAIN_REPOSITORY
@@ -162,6 +162,14 @@
 # The default is taken unless you set it to a nonempty value
 # (use e.g. POSTSYNC_DAYS_GIT_REPACK_REPO=" " to disable the feature).
 # POSTSYNC_DAYS_GIT_REPACK_REPO="* 30"
+
+# Whether git repack should do further cleanup (gc, prune, etc).
+# This can save a lot of space but in rare situations with forced pushes
+# this can cause breakage.
+# This is a list of repositories for which you want the cleanup.
+# The repository * means every repository except the main repository.
+# The repository ** means every repository.
+# POSTSYNC_GIT_GC_PRUNE="**"
 
 # The number to use for --jobs when calling egencache.
 # The empty value (default) means the number of processors.

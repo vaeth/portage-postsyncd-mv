@@ -10,5 +10,4 @@ git_repack_days
 [ -n "${git_repack_days:++}" ] || exit 0
 set -- "$git_repack_days" .git/git-repack.date
 ! max_days_file "$@" || exit 0
-git_repack . "Calling git-repack for the $repository_name repository" \
-	&& update_days_file "$@"
+git_repack . && update_days_file "$@"
