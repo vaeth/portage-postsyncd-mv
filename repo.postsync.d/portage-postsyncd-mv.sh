@@ -437,7 +437,7 @@ current_date() {
 # is non-empty and non-readable, failure is returned independent of $file.
 # If $not_exist has the special value '' and $days is positive do not check
 # date.
-# After rturn, the variable $max_days_file contains the timestamp or is empty
+# After return, the variable $max_days_file contains the timestamp or is empty
 # in case of early return.
 max_days_file() {
 	max_days_file=
@@ -693,7 +693,7 @@ is_git() {
 	*.git)
 		return 0;;
 	esac
-	return 1
+	git_repository
 }
 
 git_repository() {
