@@ -794,9 +794,10 @@ postsync_sync() {
 }
 
 chperm_vars() {
-	[ -n "${POSTSYNC_CHPERM++}" ] || POSTSYNC_CHPERM='** 3755 0644 portage portage'
+	[ -n "${POSTSYNC_CHPERM++}" ] || POSTSYNC_CHPERM='** 3755 0644 0755 portage portage'
 	chperm_dir=
 	chperm_file=
+	chperm_hooksfile=
 	chperm_user=
 	chperm_group=
 	case $- in
@@ -817,8 +818,11 @@ chperm_vars() {
 			chperm_mode=file
 			[ $chperm_vars_pick -ne 0 ] || chperm_dir=$chperm_vars;;
 		file)
-			chperm_mode=user
+			chperm_mode=hooksfile
 			[ $chperm_vars_pick -ne 0 ] || chperm_file=$chperm_vars;;
+		hooksfile)
+			chperm_mode=user
+			[ $chperm_vars_pick -ne 0 ] || chperm_hooksfile=$chperm_vars;;
 		user)
 			chperm_mode=group
 			[ $chperm_vars_pick -ne 0 ] || chperm_user=$chperm_vars;;
@@ -834,6 +838,7 @@ chperm_vars() {
 	chperm_vars=1
 	is_octal "$chperm_dir" && chperm_vars=0 || chperm_dir=
 	is_octal "$chperm_file" && chperm_vars=0 || chperm_file=
+	is_octal "$chperm_hooksfile" && chperm_vars=0 || chperm_hooksfile=
 	is_valid_user "$chperm_user" && chperm_vars=0 || chperm_user=
 	is_valid_user "$chperm_group" && chperm_vars=0 || chperm_group=
 	return $chperm_vars
@@ -841,21 +846,29 @@ chperm_vars() {
 
 chperm_set() {
 	chperm_vars || return 0
-	ebeginv "Setting permissions ${chperm_dir:--}/${chperm_file:--} ${chperm_user:--}:${chperm_group:--} for repository $repository_name"
+	ebeginv "Setting permissions ${chperm_dir:--}/${chperm_file:--}(${chperm_hooksfile:--}) ${chperm_user:--}:${chperm_group:--} for repository $repository_name"
 	init_vars
 	set -- find "$repository_path"
 	chperm_or=
-	chperm_or_set='-name a -name b -o'
+	chperm_or_set='-o'
 	if [ -n "$chperm_dir" ]
-	then	set -- ${1+"$@"} \
+	then	set -- ${1+"$@"} $chperm_or \
 		-type d '!' -perm "$chperm_dir" '!' -type l \
 		-exec chmod $option_verbose -- "$chperm_dir" '{}' '+'
 		chperm_or=$chperm_or_set
 	fi
 	if [ -n "$chperm_file" ]
 	then	set -- ${1+"$@"} $chperm_or \
+		'!' -path "*/.git/hooks/*" \
 		-type f '!' -perm "$chperm_file" '!' -type l \
 		-exec chmod $option_verbose -- "$chperm_file" '{}' '+'
+		chperm_or=$chperm_or_set
+	fi
+	if [ -n "$chperm_hooksfile" ]
+	then	set -- ${1+"$@"} $chperm_or \
+		-path "*/.git/hooks/*" \
+		-type f '!' -perm "$chperm_hooksfile" '!' -type l \
+		-exec chmod $option_verbose -- "$chperm_hooksfile" '{}' '+'
 		chperm_or=$chperm_or_set
 	fi
 	if [ -n "$chperm_user" ]

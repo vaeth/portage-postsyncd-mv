@@ -30,16 +30,18 @@
 
 # First the permissions of the repository directory are set.
 # This is specified by a list of the form
-# "repository dir_perm file_perm user group repository ..."
+# "repository dir_perm file_perm hooksfile_perm user group repository ..."
 # The first matching repository is taken.
 # The repository * means every repository except the main repository.
 # The repository ** means every repository.
 # dir_perm and file_perm should be octal values or non-numbers.
 # If octal values, all dir/file permissions in the repository's directory
-# are set correspodingly, respectively, if they differ.
+# are set correspondingly, respectively, if they differ.
+# hooksfile_perm is analogous to file_perm but for the files */.git/hooks/*
+# (which are excluded from file_perm because they usually must be executable).
 # Analogously for user or group (which can be names or ids); an invalid
 # user/group (e.g. "-") means that user/group is not modified.
-# POSTSYNC_CHPERM="** 3755 0644 portage portage"
+# POSTSYNC_CHPERM="** 3755 0644 0755 portage portage"
 
 # The permissions which should be used to access the repositories.
 # As soon as possible, permissions are dropped to the corresponding user.

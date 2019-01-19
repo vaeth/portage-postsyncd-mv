@@ -1,5 +1,13 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-8.0:
+	Martin Väth <mvath at google.com>:
+	- Support different permissions for */.git/hooks/* (default to 0755)
+
+*portage-postsyncd-mv-7.1:
+	Martin Väth <martin at mvath.de>:
+	- Assume existing .git indicates git syncing
+
 *portage-postsyncd-mv-7.0:
 	Martin Väth <martin at mvath.de>:
 	- Support gentoo-mirror via variable POSTSYNC_MIRROR
