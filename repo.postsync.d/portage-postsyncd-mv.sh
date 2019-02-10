@@ -615,15 +615,14 @@ git_clone() {
 # $git_repack must be true or false and $local_path must be set.
 git_repack_exec() {
 	if ! $git_repack
-	then	git -C "$local_path" repack -a -d
+	then	git -C "$local_path" repack -f -a -d --window=250 --depth=250
 		return
 	fi
 	git_gc_prune=0
 	git -C "$local_path" prune || git_gc_prune=$?
-	git -C "$local_path" repack -a -d || git_gc_prune=$?
 	git -C "$local_path" reflog expire --expire=now --all || git_gc_prune=$?
-	git -C "$local_path" gc '--prune=all' --aggressive || git_gc_prune=$?
-	git -C "$local_path" repack -a -d || git_gc_prune=$?
+	git -C "$local_path" gc '--prune=all' || git_gc_prune=$?
+	git -C "$local_path" repack -f -a -d --window=250 --depth=250 || git_gc_prune=$?
 	git -C "$local_path" prune || git_gc_prune=$?
 	return $git_gc_prune
 }
