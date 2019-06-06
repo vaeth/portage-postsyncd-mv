@@ -43,7 +43,7 @@ you can configure a lot of details through `POSTSYNC_*` variables
 in your `/etc/portage/make.conf`. Read `repo.postsync.d/README`
 for the available variables and their default values.
 
-If you use `app-portage/portage-utils`, it is recommended to call
+If you use `<=app-portage/portage-utils-0.74-r1`, it is recommended to call
 ```
 chmod a-x /etc/portage/repo.postsync.d/q-reinit
 ```

@@ -1,5 +1,9 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-8.2:
+	Martin Väth <mvath at google.com>:
+	- Work with >=portage-utils-0.80_pre20190605
+
 *portage-postsyncd-mv-8.1:
 	Martin Väth <mvath at google.com>:
 	- Avoid git gc --agressive. Use instead:
