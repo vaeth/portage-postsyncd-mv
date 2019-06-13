@@ -32,9 +32,6 @@ Alternatively, copy the content of `repo.postsync.d/` to
 `/etc/portage/repo.postsync.d/`, the content of `bin/` to your `$PATH`
 (perhaps `/usr/bin`). For __zsh completion__ support, copy the content of
 `zsh/` to your zsh's `$fpath` (perhaps `/usr/share/zsh/site-functions`).
-To get the hack for `q-reinit` mentioned below, also copy the file
-`app-portage/portage-utils` into `/etc/portage/env/app-portage/`
-(creating this directory and its parents if it does not exist yet).
 
 ## Configuration
 
@@ -43,29 +40,13 @@ you can configure a lot of details through `POSTSYNC_*` variables
 in your `/etc/portage/make.conf`. Read `repo.postsync.d/README`
 for the available variables and their default values.
 
-If you use `<=app-portage/portage-utils-0.74-r1`, it is recommended to call
-```
-chmod a-x /etc/portage/repo.postsync.d/q-reinit
-```
-
-(The file `app-portage/portage-utils` - when copied to
-`/etc/portage/env/app-portage/` - is a hack which will make this
-happen automatically at any future emerge of `app-portage/portage-utils`).
-In this way, the script `/etc/portage/repo.postsync.d/q-reinit`
-will be executed at a more appropriate time of syncing and with more
-explicit output by `/etc/portage/repo.postsync.d/??-q-reinit`.
-However, the latter script is careful to not do anything if you have
-not executed the above command - so nothing really bad will happen
-if you do not follow the above recommendation.
-
 Of course, it is also possible to remove the executable bits of some
 files of this project in `/etc/portage/repo.postsync.d/*`.
 Then, of course, the corresponding functionality will be switched off.
 The project is written in such a way that this is not harmful.
 
 Except for setting permissions of your repositories and
-calling egencache for your non-main repositories
-(and `q-reinit` for all repositories), the scripts do nothing
+calling egencache for your non-main repositories, the scripts do nothing
 unless you configure your main repository to be fetched via git.
 The scripts recognize the latter by checking that the sync-uri
 of your `$POSTSYNC_MAIN_REPOSITORY` ends with `.git`.
