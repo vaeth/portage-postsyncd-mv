@@ -5,6 +5,7 @@ postsync hooks for portage to sync from git
 (C) Martin Väth (martin at mvath.de).
 
 This project is under the GPL-2 license
+SPDX-License-Identifier: GPL-2.0-only
 
 This project provides several files which can be used for syncing with
 portage via git or github.

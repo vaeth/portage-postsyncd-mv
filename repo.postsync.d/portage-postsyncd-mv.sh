@@ -1,5 +1,6 @@
 #!/bin/sh
 # This file must be sourced. The above line is only for editors
+# SPDX-License-Identifier: GPL-2.0-only
 [ -n "${1-}" ] || exit 0
 : ${POSTSYNC_MAIN_REPOSITORY:=gentoo}
 case $only_main in

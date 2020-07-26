@@ -1,17 +1,25 @@
 # ChangeLog for portage-postsyncd-mv
 
+*portage-postsyncd-mv-8.4:
+	Martin Väth <martin at mvath.de>:
+	- Add SPDX-License-Identifier
+
+*portage-postsyncd-mv-8.3:
+	Martin Väth <martin at mvath.de>:
+	- Remove support for portage-utils (q-reinit)
+
 *portage-postsyncd-mv-8.2:
-	Martin Väth <mvath at google.com>:
+	Martin Väth <martin at mvath.de>:
 	- Work with >=portage-utils-0.80_pre20190605
 
 *portage-postsyncd-mv-8.1:
-	Martin Väth <mvath at google.com>:
+	Martin Väth <martin at mvath.de>:
 	- Avoid git gc --agressive. Use instead:
 	- git repack -f -a -d --window=250 --depth=250
 	  https://metalinguist.wordpress.com/2007/12/06/the-woes-of-git-gc-aggressive-and-how-git-deltas-work
 
 *portage-postsyncd-mv-8.0:
-	Martin Väth <mvath at google.com>:
+	Martin Väth <martin at mvath.de>:
 	- Support different permissions for */.git/hooks/* (default to 0755)
 
 *portage-postsyncd-mv-7.1:

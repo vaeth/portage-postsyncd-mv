@@ -1,6 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-only
 # You can copy this file into /etc/portage/make.conf
 # (It is also possible to turn /etc/portage/make.conf/ into a directory
 # and to move this file and the original /etc/portage/make.conf there).
+
 # Here variables are set which are used in /etc/portage/repo.postsync.d/*
 # If the variables are not set, the default values in the comments are used
 
